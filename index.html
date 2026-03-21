@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -84,7 +84,6 @@ border-radius:12px;
 </style>
 </head>
 
-
 <body>
 
 <div class="container">
@@ -130,7 +129,7 @@ const SUPABASE_URL = "https://wqsrvwlxxhbzorgvupco.supabase.co"
 
 const SUPABASE_KEY = "sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3J2d2x4eGhiem9yZ3Z1cGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDk2ODcsImV4cCI6MjA4OTY4NTY4N30.-o8uBa0P320bK7rPV3pwwVScVM7mCAnlMMTcG_HMjEg"
 
-const supabase = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+const supabaseClient = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
 
 let coins=0
 let opened=0
@@ -220,7 +219,7 @@ playerName+" collected "+coins+" coins!"
 
 document.getElementById("finish").style.display="block"
 
-await supabase
+await supabaseClient
 .from("Scores")
 .insert([{name:playerName,score:coins}])
 
@@ -230,7 +229,7 @@ loadLeaderboard()
 
 async function loadLeaderboard(){
 
-let { data } = await supabase
+let { data } = await supabaseClient
 .from("Scores")
 .select("*")
 .order("score",{ascending:false})
