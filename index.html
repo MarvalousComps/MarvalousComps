@@ -1,16 +1,89 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Marvalous Competitions</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(180deg,#5a00b5,#8a2be2);
+color:white;
+text-align:center;
+}
+
+.container{
+padding:30px 20px;
+}
+
+button{
+background:#ffd34d;
+border:none;
+padding:14px 26px;
+font-size:18px;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+#game{
+display:grid;
+grid-template-columns:repeat(4,80px);
+gap:18px;
+justify-content:center;
+margin-top:25px;
+}
+
+.box{
+width:80px;
+height:80px;
+background:#1e1e1e;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:34px;
+cursor:pointer;
+}
+
+#leaderboard{
+margin-top:25px;
+font-size:18px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Marvalous Competitions</h1>
+<p>Mystery Box Challenge</p>
+
+<h2>Coins: <span id="coins">0</span></h2>
+
+<button onclick="startGame()">Start Today's Hunt</button>
+
+<div id="game"></div>
+
+<div id="result"></div>
+
+<h3>Top Players</h3>
+<div id="leaderboard"></div>
+
+</div>
 
 <script>
-
-const supabaseUrl = "https://wqsrvwlxxhbzorgvupco.supabase.co"
-const supabaseKey = "sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6"
-
-const supabase = supabase.createClient(supabaseUrl, supabaseKey)
 
 let coins = 0
 let opened = 0
 let total = 12
 let playerName = ""
+
+let scores = []
 
 function startGame(){
 
@@ -71,7 +144,6 @@ opened++
 
 document.getElementById("coins").innerText = coins
 
-this.style.background="#222"
 this.onclick=null
 
 if(opened===total){
@@ -86,39 +158,37 @@ document.getElementById("game").appendChild(box)
 
 }
 
-async function endGame(){
+function endGame(){
 
-let week = new Date().getWeek
+scores.push({
+name:playerName,
+score:coins
+})
 
-await supabase
-.from("scores")
-.insert([{name:playerName,score:coins,week:week}])
+scores.sort((a,b)=>b.score-a.score)
+
+scores = scores.slice(0,10)
+
+updateLeaderboard()
 
 document.getElementById("result").innerHTML =
 "You collected "+coins+" coins!"
 
-loadLeaderboard()
-
 }
 
-async function loadLeaderboard(){
-
-let { data } = await supabase
-.from("scores")
-.select("*")
-.order("score",{ascending:false})
-.limit(10)
+function updateLeaderboard(){
 
 let html=""
 
-data.forEach(p=>{
-html += p.name + " - " + p.score + "<br>"
+scores.forEach(player=>{
+html += player.name + " - " + player.score + "<br>"
 })
 
 document.getElementById("leaderboard").innerHTML = html
 
 }
 
-loadLeaderboard()
-
 </script>
+
+</body>
+</html>
