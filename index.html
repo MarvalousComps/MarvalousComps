@@ -91,8 +91,16 @@ animation:pop 0.3s ease;
 100%{transform:scale(1)}
 }
 
+.screen{
+display:none;
+}
+
+.active{
+display:block;
+}
+
 .leaderboard{
-margin-top:25px;
+margin-top:20px;
 background:rgba(0,0,0,0.4);
 padding:15px;
 border-radius:12px;
@@ -107,7 +115,9 @@ border-radius:12px;
 
 <img src="Logo.jpg" class="logo">
 
-<div id="start">
+<!-- START SCREEN -->
+
+<div id="startScreen" class="screen active">
 
 <h2>Treasure Box Challenge</h2>
 
@@ -119,23 +129,44 @@ border-radius:12px;
 
 </div>
 
-<h3 id="score"></h3>
+
+<!-- GAME SCREEN -->
+
+<div id="gameScreen" class="screen">
+
+<h3 id="score">Coins: 0</h3>
 
 <div id="game" class="grid"></div>
 
-<div id="finish" style="display:none">
+</div>
+
+
+<!-- RESULT SCREEN -->
+
+<div id="resultScreen" class="screen">
 
 <h2 id="result"></h2>
 
 <button onclick="showLeaderboard()">View Top Players</button>
 
-<div class="leaderboard">
+</div>
 
-<h3>Top Players This Week</h3>
+
+<!-- LEADERBOARD SCREEN -->
+
+<div id="leaderboardScreen" class="screen">
+
+<h2>Top Players</h2>
+
+<div class="leaderboard">
 
 <div id="leaderboard"></div>
 
 </div>
+
+<br>
+
+<button onclick="restartGame()">Play Again Tomorrow</button>
 
 </div>
 
@@ -154,6 +185,14 @@ let coins=0
 let opened=0
 let playerName=""
 
+function switchScreen(screen){
+
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"))
+
+document.getElementById(screen).classList.add("active")
+
+}
+
 function startGame(){
 
 playerName=document.getElementById("playerName").value
@@ -168,7 +207,7 @@ alert("You already played today")
 return
 }
 
-document.getElementById("start").style.display="none"
+switchScreen("gameScreen")
 
 coins=0
 opened=0
@@ -188,6 +227,10 @@ box.className="box"
 box.innerHTML="🎁"
 
 box.onclick=function(){
+
+if(box.classList.contains("opened")) return
+
+box.classList.add("opened")
 
 let r=Math.random()
 
@@ -231,22 +274,20 @@ async function finishGame(){
 
 localStorage.setItem("played",new Date().toDateString())
 
-document.getElementById("game").innerHTML=""
+switchScreen("resultScreen")
 
 document.getElementById("result").innerText=
 playerName+" collected "+coins+" coins!"
-
-document.getElementById("finish").style.display="block"
 
 await supabaseClient
 .from("scores")
 .insert([{name:playerName,score:coins}])
 
-loadLeaderboard()
-
 }
 
-async function loadLeaderboard(){
+async function showLeaderboard(){
+
+switchScreen("leaderboardScreen")
 
 let { data } = await supabaseClient
 .from("scores")
@@ -266,9 +307,9 @@ else if(i==2) medal="🥉"
 else medal=(i+1)+"."
 
 html+=`
-<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2);font-size:18px">
+<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2)">
 <span>${medal} ${p.name}</span>
-<span>${p.score} coins</span>
+<span>${p.score}</span>
 </div>
 `
 
@@ -278,9 +319,9 @@ document.getElementById("leaderboard").innerHTML=html
 
 }
 
-function showLeaderboard(){
+function restartGame(){
 
-loadLeaderboard()
+switchScreen("startScreen")
 
 }
 
