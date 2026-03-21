@@ -2,39 +2,66 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Marvalous Competitions</title>
+<title>Marvalous Mystery Box</title>
 
 <style>
 
 body{
-font-family:Arial;
-text-align:center;
-background:linear-gradient(#6a00a8,#7a00c4);
-color:white;
 margin:0;
-padding:30px;
+font-family:Arial;
+background:linear-gradient(180deg,#5a00b5,#8a2be2);
+color:white;
+text-align:center;
+}
+
+.container{
+padding:30px 20px;
+}
+
+h1{
+margin-top:10px;
 }
 
 button{
-background:#ffc107;
+background:#ffd34d;
 border:none;
-padding:12px 20px;
+padding:14px 26px;
 font-size:18px;
-border-radius:8px;
+border-radius:10px;
 cursor:pointer;
+font-weight:bold;
 }
 
 #game{
 display:grid;
 grid-template-columns:repeat(4,80px);
-gap:15px;
+gap:18px;
 justify-content:center;
 margin-top:25px;
 }
 
-.chest{
-font-size:45px;
+.box{
+width:80px;
+height:80px;
+background:linear-gradient(#ffcc33,#e6a800);
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:36px;
 cursor:pointer;
+box-shadow:0 6px 0 rgba(0,0,0,0.2);
+transition:transform .2s;
+}
+
+.box:hover{
+transform:scale(1.05);
+}
+
+.result{
+margin-top:25px;
+font-size:20px;
+font-weight:bold;
 }
 
 </style>
@@ -42,105 +69,107 @@ cursor:pointer;
 
 <body>
 
+<div class="container">
+
 <h1>Marvalous Competitions</h1>
-<h3>Treasure Chest Challenge</h3>
+<p>Mystery Box Challenge</p>
 
-<p>Open all chests and collect coins</p>
-<p>You can play once per day</p>
+<p>Open the boxes and collect coins</p>
 
-<h3>Coins: <span id="coins">0</span></h3>
+<h2>Coins: <span id="coins">0</span></h2>
 
 <button onclick="startGame()">Start Today's Hunt</button>
 
 <div id="game"></div>
 
+<div class="result" id="result"></div>
+
+</div>
+
 <script>
 
-let coins = 0
-let opened = 0
-let totalChests = 12
+let coins=0
+let opened=0
+let total=12
 
 function startGame(){
 
-let lastPlay = localStorage.getItem("lastPlay")
-let today = new Date().toDateString()
+let lastPlay=localStorage.getItem("lastPlay")
+let today=new Date().toDateString()
 
-if(lastPlay === today){
+if(lastPlay===today){
 alert("You already played today")
 return
 }
 
 localStorage.setItem("lastPlay",today)
 
-document.getElementById("game").innerHTML=""
+coins=0
+opened=0
 
-coins = 0
-opened = 0
-updateCoins()
+document.getElementById("coins").innerText=0
+document.getElementById("game").innerHTML=""
+document.getElementById("result").innerHTML=""
 
 for(let i=0;i<12;i++){
 
-let chest = document.createElement("div")
-chest.className = "chest"
-chest.innerHTML = "📦"
+let box=document.createElement("div")
+box.className="box"
+box.innerHTML="🎁"
 
-chest.onclick = function(){
+box.onclick=function(){
 
-let rand = Math.random()
-let reward = 0
+let r=Math.random()
+let reward=0
 
-if(rand < 0.4){
-reward = 0
-this.innerHTML = "❌"
+if(r<0.4){
+reward=0
+this.innerHTML="❌"
 }
 
-else if(rand < 0.7){
-reward = 1
-this.innerHTML = "🪙"
+else if(r<0.7){
+reward=1
+this.innerHTML="🪙"
 }
 
-else if(rand < 0.9){
-reward = 3
-this.innerHTML = "💰"
+else if(r<0.9){
+reward=3
+this.innerHTML="💰"
 }
 
 else{
-reward = 5
-this.innerHTML = "🏆"
+reward=10
+this.innerHTML="🏆"
 }
 
-coins = coins + reward
-opened = opened + 1
+coins+=reward
+opened++
 
-updateCoins()
+document.getElementById("coins").innerText=coins
 
-this.onclick = null
+this.style.background="#222"
+this.onclick=null
 
-if(opened === totalChests){
-finishGame()
-}
-
-}
-
-document.getElementById("game").appendChild(chest)
-
+if(opened===total){
+endGame()
 }
 
 }
 
-function updateCoins(){
-document.getElementById("coins").innerText = coins
+document.getElementById("game").appendChild(box)
+
 }
 
-function finishGame(){
+}
+
+function endGame(){
 
 setTimeout(function(){
 
-alert("Game finished! You collected " + coins + " coins!")
+document.getElementById("result").innerHTML=
+"You collected "+coins+" coins! Come back tomorrow to play again."
 
-document.getElementById("game").innerHTML = ""
-
-},500)
+},600)
 
 }
 
