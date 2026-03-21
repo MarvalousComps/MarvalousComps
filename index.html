@@ -1,89 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<meta charset="UTF-8">
 <title>Marvalous Competitions</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
 body{
-margin:0;
+background:linear-gradient(180deg,#5e1bbd,#3b0f7a);
 font-family:Arial;
-background:linear-gradient(#6e21d1,#2b0759);
 color:white;
-display:flex;
-align-items:center;
-justify-content:center;
-height:100vh;
 text-align:center;
+margin:0;
+padding:0;
 }
 
 .container{
-width:420px;
-max-width:95%;
+max-width:700px;
+margin:auto;
+padding:40px 20px;
 }
 
 .logo{
-width:280px;
-margin-bottom:10px;
-}
-
-input{
-padding:12px;
-width:80%;
-border-radius:6px;
-border:none;
-margin-bottom:15px;
-font-size:16px;
+width:320px;
+margin-bottom:20px;
 }
 
 button{
-background:#ffd84d;
+background:#ffd34d;
 border:none;
-padding:14px 24px;
-border-radius:8px;
-font-size:16px;
-font-weight:bold;
+padding:15px 25px;
+font-size:18px;
+border-radius:10px;
 cursor:pointer;
 }
 
 .grid{
-margin-top:30px;
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:14px;
+gap:15px;
+margin-top:25px;
 }
 
 .box{
-background:#1c1c1c;
-border-radius:12px;
+background:#111;
 height:80px;
+border-radius:12px;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:28px;
 cursor:pointer;
-transition:0.2s;
 }
 
-.box:hover{
-transform:scale(1.08);
+.hidden{
+display:none;
 }
 
 .leaderboard{
-margin-top:25px;
-background:rgba(0,0,0,0.4);
-padding:15px;
-border-radius:12px;
+margin-top:30px;
+background:#00000040;
+padding:20px;
+border-radius:15px;
 }
 
 </style>
-</head>
 
+</head>
 
 <body>
 
@@ -91,146 +76,131 @@ border-radius:12px;
 
 <img src="Logo.jpg" class="logo">
 
-<div id="start">
+<h2>Mystery Box Challenge</h2>
 
-<h2>Treasure Box Challenge</h2>
+<p>Open the boxes and collect coins</p>
 
-<input id="playerName" placeholder="Enter your name">
+<h3 id="coins">Coins: 0</h3>
 
-<br>
+<div id="startScreen">
+
+<input id="playerName" placeholder="Enter your name"
+style="padding:10px;font-size:16px;border-radius:8px;border:none">
+
+<br><br>
 
 <button onclick="startGame()">Start Today's Hunt</button>
 
 </div>
 
-<h3 id="score"></h3>
+<div id="gameGrid" class="grid hidden"></div>
 
-<div id="game" class="grid"></div>
-
-<div id="finish" style="display:none">
+<div id="endScreen" class="hidden">
 
 <h2 id="result"></h2>
 
-<div class="leaderboard">
+<p>Come back tomorrow to play again!</p>
 
-<h3>Top Players This Week</h3>
+<button onclick="showLeaderboard()">View Leaderboard</button>
 
-<div id="leaderboard"></div>
+</div>
+
+<div id="leaderboard" class="leaderboard hidden">
+
+<h2>Top Players</h2>
+
+<div id="scores"></div>
 
 </div>
 
 </div>
-
-</div>
-
 
 <script>
 
 const SUPABASE_URL = "https://wqsrvwlxxhbzorgvupco.supabase.co"
 const SUPABASE_KEY = "sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3J2d2x4eGhiem9yZ3Z1cGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDk2ODcsImV4cCI6MjA4OTY4NTY4N30.-o8uBa0P320bK7rPV3pwwVScVM7mCAnlMMTcG_HMjEg"
 
-const supabase = supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
 
 let coins=0
 let opened=0
-let playerName=""
+
+const rewards=[0,0,0,1,1,1,2,2,5,0,3,4]
 
 function startGame(){
 
-playerName=document.getElementById("playerName").value
+const name=document.getElementById("playerName").value
 
-if(playerName==""){
-alert("Enter your name")
+if(!name){
+alert("Enter your name first")
 return
 }
 
-if(localStorage.getItem("played")==new Date().toDateString()){
-alert("You already played today")
-return
-}
+document.getElementById("startScreen").classList.add("hidden")
 
-document.getElementById("start").style.display="none"
+const grid=document.getElementById("gameGrid")
+grid.classList.remove("hidden")
 
-coins=0
-opened=0
+shuffle(rewards)
 
-document.getElementById("score").innerText="Coins: 0"
+grid.innerHTML=""
 
-const game=document.getElementById("game")
+rewards.forEach(value=>{
 
-game.innerHTML=""
-
-for(let i=0;i<12;i++){
-
-let box=document.createElement("div")
-
+const box=document.createElement("div")
 box.className="box"
-
 box.innerHTML="🎁"
 
-box.onclick=function(){
+box.onclick=()=>openBox(box,value)
 
-let r=Math.random()
+grid.appendChild(box)
 
-if(r<0.5){
-
-box.innerHTML="🪙"
-coins+=5
+})
 
 }
-else if(r<0.7){
 
-box.innerHTML="💰"
-coins+=10
+function openBox(box,value){
 
-}
-else{
+if(box.classList.contains("opened")) return
 
-box.innerHTML="❌"
-
-}
+box.classList.add("opened")
 
 opened++
 
-document.getElementById("score").innerText="Coins: "+coins
+if(value===0){
+box.innerHTML="❌"
+}else{
+box.innerHTML="🪙"+value
+coins+=value
+document.getElementById("coins").innerText="Coins: "+coins
+}
 
-if(opened==12){
-
+if(opened===12){
 finishGame()
-
-}
-
-}
-
-game.appendChild(box)
-
 }
 
 }
 
 async function finishGame(){
 
-localStorage.setItem("played",new Date().toDateString())
+document.getElementById("result").innerText="You collected "+coins+" coins!"
 
-document.getElementById("game").innerHTML=""
+document.getElementById("endScreen").classList.remove("hidden")
 
-document.getElementById("result").innerText=
-playerName+" collected "+coins+" coins!"
+const name=document.getElementById("playerName").value
 
-document.getElementById("finish").style.display="block"
-
-await supabase
-.from("Scores")
-.insert([{name:playerName,score:coins}])
-
-loadLeaderboard()
+await supabaseClient
+.from("scores")
+.insert([{name:name,score:coins}])
 
 }
 
-async function loadLeaderboard(){
+async function showLeaderboard(){
 
-let { data } = await supabase
-.from("Scores")
+document.getElementById("leaderboard").classList.remove("hidden")
+
+const {data}=await supabaseClient
+.from("scores")
 .select("*")
 .order("score",{ascending:false})
 .limit(10)
@@ -239,11 +209,23 @@ let html=""
 
 data.forEach((p,i)=>{
 
-html+=(i+1)+". "+p.name+" – "+p.score+" coins<br>"
+html+=`<p>${i+1}. ${p.name} - ${p.score}</p>`
 
 })
 
-document.getElementById("leaderboard").innerHTML=html
+document.getElementById("scores").innerHTML=html
+
+}
+
+function shuffle(array){
+
+for(let i=array.length-1;i>0;i--){
+
+const j=Math.floor(Math.random()*(i+1))
+
+[array[i],array[j]]=[array[j],array[i]]
+
+}
 
 }
 
