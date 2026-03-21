@@ -49,6 +49,7 @@ border-radius:8px;
 font-size:16px;
 font-weight:bold;
 cursor:pointer;
+margin-top:10px;
 }
 
 .grid{
@@ -109,6 +110,8 @@ border-radius:12px;
 <div id="finish" style="display:none">
 
 <h2 id="result"></h2>
+
+<button onclick="showLeaderboard()">View Top Players</button>
 
 <div class="leaderboard">
 
@@ -244,6 +247,12 @@ html+=(i+1)+". "+p.name+" – "+p.score+" coins<br>"
 })
 
 document.getElementById("leaderboard").innerHTML=html
+
+}
+
+function showLeaderboard(){
+
+loadLeaderboard()
 
 }
 
