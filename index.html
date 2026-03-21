@@ -1,149 +1,237 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Marvalous Competitions - Mystery Box</title>
+<title>Marvalous Competitions - Treasure Chest Game</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
 body{
-font-family: Arial, sans-serif;
-background:#6a00b8;
-color:white;
+background:#5a00a8;
+font-family:Arial;
 text-align:center;
+color:white;
 margin:0;
-padding:0;
+padding:20px;
 }
 
 h1{
-margin-top:30px;
-font-size:36px;
+font-size:34px;
+margin-bottom:5px;
 }
 
 h2{
-margin-top:5px;
-font-weight:normal;
+margin-top:0;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(3,120px);
-gap:20px;
+grid-template-columns:repeat(4,90px);
+gap:15px;
 justify-content:center;
-margin-top:40px;
+margin-top:25px;
 }
 
-.box{
-width:120px;
-height:120px;
-background:gold;
-border-radius:14px;
+.chest{
+width:90px;
+height:90px;
+background:linear-gradient(#ffcc00,#b8860b);
+border-radius:12px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:32px;
-font-weight:bold;
-color:black;
+font-size:34px;
 cursor:pointer;
+box-shadow:0 6px 0 #7a5400;
 transition:0.2s;
 }
 
-.box:hover{
-transform:scale(1.08);
+.chest:hover{
+transform:scale(1.05);
 }
 
-.win{
-background:#00ff8c;
+.open{
+background:#222;
+box-shadow:none;
 }
 
-.lose{
-background:#ff3b3b;
-color:white;
+#score{
+font-size:22px;
+margin-top:10px;
+}
+
+#leaderboard{
+margin-top:30px;
+font-size:18px;
+}
+
+button{
+padding:12px 20px;
+font-size:18px;
+margin-top:15px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#ffcc00;
+color:black;
+}
+
+button:hover{
+background:#ffd633;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <h1>Marvalous Competitions</h1>
-<h2>Mystery Box Game</h2>
+<h2>Treasure Chest Challenge</h2>
 
-<p>Tap a box for a chance to win £50</p>
+<p>Open all chests and collect coins.</p>
+<p>You can play once per day.</p>
 
-<div class="grid">
+<div id="score">Coins: 0</div>
 
-<div class="box" onclick="reveal(this,1)">1</div>
-<div class="box" onclick="reveal(this,2)">2</div>
-<div class="box" onclick="reveal(this,3)">3</div>
-<div class="box" onclick="reveal(this,4)">4</div>
-<div class="box" onclick="reveal(this,5)">5</div>
-<div class="box" onclick="reveal(this,6)">6</div>
-<div class="box" onclick="reveal(this,7)">7</div>
-<div class="box" onclick="reveal(this,8)">8</div>
-<div class="box" onclick="reveal(this,9)">9</div>
+<div id="grid" class="grid"></div>
 
-</div>
+<button onclick="startGame()">Start Today’s Hunt</button>
+
+<h3>Top 10 Players This Week</h3>
+
+<div id="leaderboard"></div>
 
 <script>
 
-let winningBox = 4
+const supabase = window.supabase.createClient(
+"https://wqsrvwlxxhbzorgvupco.supabase.co",
+"sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6"
+)
 
-function reveal(box,number){
+let score=0
+let opened=0
 
-if(box.classList.contains("win") || box.classList.contains("lose")){
-return
+const prizes=[0,1,1,2,2,3,3,5,5,8,10,15]
+
+function getWeek(){
+let d=new Date()
+let first=new Date(d.getFullYear(),0,1)
+let week=Math.ceil((((d-first)/86400000)+first.getDay()+1)/7)
+return d.getFullYear()+"-W"+week
 }
 
-if(number === winningBox){
+function canPlay(){
+let today=new Date().toDateString()
+let last=localStorage.getItem("played")
 
-box.innerHTML="£50!"
-box.classList.add("win")
+if(last===today){
+alert("You have already played today. Come back tomorrow!")
+return false
+}
 
-confetti()
+return true
+}
+
+function startGame(){
+
+if(!canPlay()) return
+
+score=0
+opened=0
+
+document.getElementById("score").innerText="Coins: 0"
+
+let grid=document.getElementById("grid")
+grid.innerHTML=""
+
+let shuffled=[...prizes].sort(()=>Math.random()-0.5)
+
+for(let i=0;i<12;i++){
+
+let chest=document.createElement("div")
+
+chest.className="chest"
+chest.innerHTML="🧰"
+
+chest.onclick=function(){
+
+if(chest.classList.contains("open")) return
+
+chest.classList.add("open")
+
+let value=shuffled[i]
+
+if(value===0){
+
+chest.innerHTML="❌"
 
 }else{
 
-box.innerHTML="TRY AGAIN"
-box.classList.add("lose")
+chest.innerHTML="🪙"+value
+
+score+=value
+
+document.getElementById("score").innerText="Coins: "+score
+
+}
+
+opened++
+
+if(opened===12){
+
+finishGame()
 
 }
 
 }
 
-function confetti(){
-
-for(let i=0;i<80;i++){
-
-let piece=document.createElement("div")
-
-piece.style.position="fixed"
-piece.style.width="8px"
-piece.style.height="8px"
-piece.style.background="white"
-piece.style.left=Math.random()*100+"%"
-piece.style.top="-10px"
-
-piece.style.opacity="0.8"
-
-document.body.appendChild(piece)
-
-let fall=setInterval(()=>{
-
-let top=parseFloat(piece.style.top)
-
-piece.style.top=(top+3)+"px"
-
-if(top>window.innerHeight){
-clearInterval(fall)
-piece.remove()
-}
-
-},16)
+grid.appendChild(chest)
 
 }
 
 }
+
+async function finishGame(){
+
+localStorage.setItem("played",new Date().toDateString())
+
+let name=prompt("Enter your Facebook name")
+
+let week=getWeek()
+
+await supabase.from("scores").insert([
+{name:name,score:score,week:week}
+])
+
+alert("You collected "+score+" coins!")
+
+loadLeaderboard()
+
+}
+
+async function loadLeaderboard(){
+
+let week=getWeek()
+
+let {data}=await supabase
+.from("scores")
+.select("*")
+.eq("week",week)
+.order("score",{ascending:false})
+.limit(10)
+
+let html=""
+
+data.forEach((p,i)=>{
+html+=(i+1)+". "+p.name+" - "+p.score+" coins<br>"
+})
+
+document.getElementById("leaderboard").innerHTML=html
+
+}
+
+loadLeaderboard()
 
 </script>
 
