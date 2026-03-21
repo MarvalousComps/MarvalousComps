@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Marvalous Competitions - Mystery Box</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#6a00b8;
+color:white;
+text-align:center;
+margin:0;
+padding:0;
+}
+
+h1{
+margin-top:30px;
+font-size:36px;
+}
+
+h2{
+margin-top:5px;
+font-weight:normal;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,120px);
+gap:20px;
+justify-content:center;
+margin-top:40px;
+}
+
+.box{
+width:120px;
+height:120px;
+background:gold;
+border-radius:14px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:32px;
+font-weight:bold;
+color:black;
+cursor:pointer;
+transition:0.2s;
+}
+
+.box:hover{
+transform:scale(1.08);
+}
+
+.win{
+background:#00ff8c;
+}
+
+.lose{
+background:#ff3b3b;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Marvalous Competitions</h1>
+<h2>Mystery Box Game</h2>
+
+<p>Tap a box for a chance to win £50</p>
+
+<div class="grid">
+
+<div class="box" onclick="reveal(this,1)">1</div>
+<div class="box" onclick="reveal(this,2)">2</div>
+<div class="box" onclick="reveal(this,3)">3</div>
+<div class="box" onclick="reveal(this,4)">4</div>
+<div class="box" onclick="reveal(this,5)">5</div>
+<div class="box" onclick="reveal(this,6)">6</div>
+<div class="box" onclick="reveal(this,7)">7</div>
+<div class="box" onclick="reveal(this,8)">8</div>
+<div class="box" onclick="reveal(this,9)">9</div>
+
+</div>
+
+<script>
+
+let winningBox = 4
+
+function reveal(box,number){
+
+if(box.classList.contains("win") || box.classList.contains("lose")){
+return
+}
+
+if(number === winningBox){
+
+box.innerHTML="£50!"
+box.classList.add("win")
+
+confetti()
+
+}else{
+
+box.innerHTML="TRY AGAIN"
+box.classList.add("lose")
+
+}
+
+}
+
+function confetti(){
+
+for(let i=0;i<80;i++){
+
+let piece=document.createElement("div")
+
+piece.style.position="fixed"
+piece.style.width="8px"
+piece.style.height="8px"
+piece.style.background="white"
+piece.style.left=Math.random()*100+"%"
+piece.style.top="-10px"
+
+piece.style.opacity="0.8"
+
+document.body.appendChild(piece)
+
+let fall=setInterval(()=>{
+
+let top=parseFloat(piece.style.top)
+
+piece.style.top=(top+3)+"px"
+
+if(top>window.innerHeight){
+clearInterval(fall)
+piece.remove()
+}
+
+},16)
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
