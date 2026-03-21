@@ -223,7 +223,7 @@ playerName+" collected "+coins+" coins!"
 document.getElementById("finish").style.display="block"
 
 await supabaseClient
-.from("Scores")
+.from("scores")
 .insert([{name:playerName,score:coins}])
 
 loadLeaderboard()
@@ -233,7 +233,7 @@ loadLeaderboard()
 async function loadLeaderboard(){
 
 let { data } = await supabaseClient
-.from("Scores")
+.from("scores")
 .select("*")
 .order("score",{ascending:false})
 .limit(10)
