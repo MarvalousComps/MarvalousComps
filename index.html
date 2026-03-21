@@ -1,118 +1,133 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+
 <title>Marvalous Competitions</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
 body{
 margin:0;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
 font-family:Arial;
-background:linear-gradient(180deg,#5a00b5,#8a2be2);
+background:linear-gradient(#5d19b3,#3c0a73);
 color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+text-align:center;
 }
 
-.gameCard{
-background:#1b0033;
-padding:40px;
-border-radius:20px;
-width:420px;
-text-align:center;
-box-shadow:0 10px 40px rgba(0,0,0,0.4);
+.container{
+max-width:420px;
+width:95%;
+}
+
+.logo{
+width:260px;
+margin-bottom:10px;
 }
 
 button{
-background:#ffd34d;
+background:#f4c542;
 border:none;
-padding:14px 30px;
-font-size:18px;
-border-radius:12px;
-cursor:pointer;
+padding:14px 24px;
+border-radius:8px;
+font-size:16px;
 font-weight:bold;
-margin-top:10px;
+cursor:pointer;
 }
 
-#game{
-display:grid;
-grid-template-columns:repeat(4,90px);
-gap:20px;
-justify-content:center;
+.grid{
 margin-top:25px;
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
 }
 
 .box{
-width:90px;
-height:90px;
-background:#2a004d;
-border-radius:14px;
+background:#111;
+border-radius:10px;
+height:75px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:38px;
+font-size:26px;
 cursor:pointer;
-transition:transform .15s;
+transition:0.2s;
 }
 
-.box:active{
-transform:scale(0.9);
+.box:hover{
+transform:scale(1.05);
 }
 
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.7);
-display:flex;
-align-items:center;
-justify-content:center;
-visibility:hidden;
+.coin{
+color:#ffd700;
 }
 
-.modalContent{
-background:white;
-color:black;
-padding:30px;
-border-radius:14px;
-text-align:center;
-width:280px;
+.empty{
+color:red;
+}
+
+.money{
+color:#7CFC00;
+}
+
+.leaderboard{
+margin-top:25px;
+background:rgba(0,0,0,0.4);
+padding:15px;
+border-radius:10px;
 }
 
 </style>
 </head>
 
+
 <body>
 
-<div class="gameCard">
+<div class="container">
 
-<h1>Marvalous Competitions</h1>
-<p>Mystery Box Challenge</p>
+<img src="Logo.jpg" class="logo">
 
-<h2>Coins: <span id="coins">0</span></h2>
+<h2>Treasure Box Challenge</h2>
+<p>Open the boxes and collect coins</p>
+
+<h3 id="score">Coins: 0</h3>
 
 <button onclick="startGame()">Start Today's Hunt</button>
 
-<div id="game"></div>
+<div id="game" class="grid"></div>
+
+<div id="finish" style="display:none">
+
+<h3 id="finishText"></h3>
+
+<div class="leaderboard">
+
+<h3>Top Players This Week</h3>
+
+<div id="leaderboard">
+
+1. Player – 120 coins<br>
+2. Player – 95 coins<br>
+3. Player – 80 coins<br>
+4. Player – 75 coins<br>
+5. Player – 60 coins<br>
+6. Player – 55 coins<br>
+7. Player – 40 coins<br>
+8. Player – 30 coins<br>
+9. Player – 20 coins<br>
+10. Player – 10 coins
 
 </div>
 
-
-<div class="modal" id="resultModal">
-<div class="modalContent">
-
-<h2 id="finalCoins"></h2>
-
-<p>Come back tomorrow to play again!</p>
-
-<button onclick="closeModal()">OK</button>
+</div>
 
 </div>
+
 </div>
 
 
@@ -120,25 +135,23 @@ width:280px;
 
 let coins=0
 let opened=0
-let total=12
+let gameStarted=false
 
 function startGame(){
 
-let lastPlay=localStorage.getItem("lastPlay")
-let today=new Date().toDateString()
-
-if(lastPlay===today){
+if(localStorage.getItem("played")==new Date().toDateString()){
 alert("You already played today")
 return
 }
 
-localStorage.setItem("lastPlay",today)
-
 coins=0
 opened=0
+gameStarted=true
 
-document.getElementById("coins").innerText=0
-document.getElementById("game").innerHTML=""
+document.getElementById("score").innerText="Coins: 0"
+
+const game=document.getElementById("game")
+game.innerHTML=""
 
 for(let i=0;i<12;i++){
 
@@ -148,40 +161,42 @@ box.innerHTML="🎁"
 
 box.onclick=function(){
 
-let r=Math.random()
-let reward=0
+if(!gameStarted)return
 
-if(r<0.4){
-reward=0
-this.innerHTML="❌"
+let reward=Math.random()
+
+if(reward<0.5){
+
+box.innerHTML="🪙"
+box.classList.add("coin")
+coins+=5
+
 }
-else if(r<0.7){
-reward=1
-this.innerHTML="🪙"
-}
-else if(r<0.9){
-reward=3
-this.innerHTML="💰"
+else if(reward<0.7){
+
+box.innerHTML="💰"
+box.classList.add("money")
+coins+=10
+
 }
 else{
-reward=10
-this.innerHTML="👑"
+
+box.innerHTML="❌"
+box.classList.add("empty")
+
 }
 
-coins+=reward
 opened++
 
-document.getElementById("coins").innerText=coins
+document.getElementById("score").innerText="Coins: "+coins
 
-this.onclick=null
-
-if(opened===total){
+if(opened==12){
 finishGame()
 }
 
 }
 
-document.getElementById("game").appendChild(box)
+game.appendChild(box)
 
 }
 
@@ -189,16 +204,14 @@ document.getElementById("game").appendChild(box)
 
 function finishGame(){
 
-document.getElementById("finalCoins").innerText=
-"You collected "+coins+" coins!"
+gameStarted=false
 
-document.getElementById("resultModal").style.visibility="visible"
+localStorage.setItem("played",new Date().toDateString())
 
-}
+document.getElementById("finishText").innerText=
+"You collected "+coins+" coins! Come back tomorrow to play again."
 
-function closeModal(){
-
-document.getElementById("resultModal").style.visibility="hidden"
+document.getElementById("finish").style.display="block"
 
 }
 
