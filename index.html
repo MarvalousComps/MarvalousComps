@@ -6,12 +6,14 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 <style>
 
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(#5d19b3,#3c0a73);
+background:linear-gradient(#6e21d1,#2b0759);
 color:white;
 display:flex;
 align-items:center;
@@ -21,17 +23,26 @@ text-align:center;
 }
 
 .container{
-max-width:420px;
-width:95%;
+width:420px;
+max-width:95%;
 }
 
 .logo{
-width:260px;
+width:280px;
 margin-bottom:10px;
 }
 
+input{
+padding:12px;
+width:80%;
+border-radius:6px;
+border:none;
+margin-bottom:15px;
+font-size:16px;
+}
+
 button{
-background:#f4c542;
+background:#ffd84d;
 border:none;
 padding:14px 24px;
 border-radius:8px;
@@ -41,45 +52,33 @@ cursor:pointer;
 }
 
 .grid{
-margin-top:25px;
+margin-top:30px;
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:12px;
+gap:14px;
 }
 
 .box{
-background:#111;
-border-radius:10px;
-height:75px;
+background:#1c1c1c;
+border-radius:12px;
+height:80px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:26px;
+font-size:28px;
 cursor:pointer;
 transition:0.2s;
 }
 
 .box:hover{
-transform:scale(1.05);
-}
-
-.coin{
-color:#ffd700;
-}
-
-.empty{
-color:red;
-}
-
-.money{
-color:#7CFC00;
+transform:scale(1.08);
 }
 
 .leaderboard{
 margin-top:25px;
 background:rgba(0,0,0,0.4);
 padding:15px;
-border-radius:10px;
+border-radius:12px;
 }
 
 </style>
@@ -92,37 +91,31 @@ border-radius:10px;
 
 <img src="Logo.jpg" class="logo">
 
-<h2>Treasure Box Challenge</h2>
-<p>Open the boxes and collect coins</p>
+<div id="start">
 
-<h3 id="score">Coins: 0</h3>
+<h2>Treasure Box Challenge</h2>
+
+<input id="playerName" placeholder="Enter your name">
+
+<br>
 
 <button onclick="startGame()">Start Today's Hunt</button>
+
+</div>
+
+<h3 id="score"></h3>
 
 <div id="game" class="grid"></div>
 
 <div id="finish" style="display:none">
 
-<h3 id="finishText"></h3>
+<h2 id="result"></h2>
 
 <div class="leaderboard">
 
 <h3>Top Players This Week</h3>
 
-<div id="leaderboard">
-
-1. Player – 120 coins<br>
-2. Player – 95 coins<br>
-3. Player – 80 coins<br>
-4. Player – 75 coins<br>
-5. Player – 60 coins<br>
-6. Player – 55 coins<br>
-7. Player – 40 coins<br>
-8. Player – 30 coins<br>
-9. Player – 20 coins<br>
-10. Player – 10 coins
-
-</div>
+<div id="leaderboard"></div>
 
 </div>
 
@@ -133,56 +126,67 @@ border-radius:10px;
 
 <script>
 
+const SUPABASE_URL = "YOUR_SUPABASE_URL"
+const SUPABASE_KEY = "YOUR_SUPABASE_KEY"
+
+const supabase = supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+
 let coins=0
 let opened=0
-let gameStarted=false
+let playerName=""
 
 function startGame(){
+
+playerName=document.getElementById("playerName").value
+
+if(playerName==""){
+alert("Enter your name")
+return
+}
 
 if(localStorage.getItem("played")==new Date().toDateString()){
 alert("You already played today")
 return
 }
 
+document.getElementById("start").style.display="none"
+
 coins=0
 opened=0
-gameStarted=true
 
 document.getElementById("score").innerText="Coins: 0"
 
 const game=document.getElementById("game")
+
 game.innerHTML=""
 
 for(let i=0;i<12;i++){
 
 let box=document.createElement("div")
+
 box.className="box"
+
 box.innerHTML="🎁"
 
 box.onclick=function(){
 
-if(!gameStarted)return
+let r=Math.random()
 
-let reward=Math.random()
-
-if(reward<0.5){
+if(r<0.5){
 
 box.innerHTML="🪙"
-box.classList.add("coin")
 coins+=5
 
 }
-else if(reward<0.7){
+else if(r<0.7){
 
 box.innerHTML="💰"
-box.classList.add("money")
 coins+=10
 
 }
 else{
 
 box.innerHTML="❌"
-box.classList.add("empty")
 
 }
 
@@ -191,7 +195,9 @@ opened++
 document.getElementById("score").innerText="Coins: "+coins
 
 if(opened==12){
+
 finishGame()
+
 }
 
 }
@@ -202,16 +208,42 @@ game.appendChild(box)
 
 }
 
-function finishGame(){
-
-gameStarted=false
+async function finishGame(){
 
 localStorage.setItem("played",new Date().toDateString())
 
-document.getElementById("finishText").innerText=
-"You collected "+coins+" coins! Come back tomorrow to play again."
+document.getElementById("game").innerHTML=""
+
+document.getElementById("result").innerText=
+playerName+" collected "+coins+" coins!"
 
 document.getElementById("finish").style.display="block"
+
+await supabase
+.from("Scores")
+.insert([{name:playerName,score:coins}])
+
+loadLeaderboard()
+
+}
+
+async function loadLeaderboard(){
+
+let { data } = await supabase
+.from("Scores")
+.select("*")
+.order("score",{ascending:false})
+.limit(10)
+
+let html=""
+
+data.forEach((p,i)=>{
+
+html+=(i+1)+". "+p.name+" – "+p.score+" coins<br>"
+
+})
+
+document.getElementById("leaderboard").innerHTML=html
 
 }
 
