@@ -1,210 +1,131 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Marvalous Competitions - Treasure Chest Game</title>
+<meta charset="UTF-8">
+<title>Marvalous Competitions</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
-
 body{
-background:#5a00a8;
 font-family:Arial;
 text-align:center;
+background:linear-gradient(#6a00a8,#7a00c4);
 color:white;
 margin:0;
-padding:20px;
+padding:30px;
 }
 
-h1{
-font-size:34px;
-margin-bottom:5px;
+button{
+background:#ffc107;
+border:none;
+padding:12px 20px;
+font-size:18px;
+border-radius:8px;
+cursor:pointer;
 }
 
-h2{
-margin-top:0;
-}
-
-.grid{
+#game{
 display:grid;
-grid-template-columns:repeat(4,90px);
+grid-template-columns:repeat(4,80px);
 gap:15px;
 justify-content:center;
 margin-top:25px;
 }
 
 .chest{
-width:90px;
-height:90px;
-background:linear-gradient(#ffcc00,#b8860b);
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:34px;
+font-size:40px;
 cursor:pointer;
-box-shadow:0 6px 0 #7a5400;
-transition:0.2s;
 }
 
-.chest:hover{
-transform:scale(1.05);
-}
-
-.open{
-background:#222;
-box-shadow:none;
-}
-
-#score{
-font-size:22px;
-margin-top:10px;
-}
-
-#leaderboard{
+.leaderboard{
 margin-top:30px;
-font-size:18px;
 }
-
-button{
-padding:12px 20px;
-font-size:18px;
-margin-top:15px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-background:#ffcc00;
-color:black;
-}
-
-button:hover{
-background:#ffd633;
-}
-
 </style>
 </head>
 
 <body>
 
 <h1>Marvalous Competitions</h1>
-<h2>Treasure Chest Challenge</h2>
+<h3>Treasure Chest Challenge</h3>
 
-<p>Open all chests and collect coins.</p>
-<p>You can play once per day.</p>
+<p>Open all chests and collect coins</p>
+<p>You can play once per day</p>
 
-<div id="score">Coins: 0</div>
+<h3>Coins: <span id="coins">0</span></h3>
 
-<div id="grid" class="grid"></div>
+<button onclick="startGame()">Start Today's Hunt</button>
 
-<button onclick="startGame()">Start Today’s Hunt</button>
+<div id="game"></div>
 
+<div class="leaderboard">
 <h3>Top 10 Players This Week</h3>
-
 <div id="leaderboard"></div>
+</div>
 
 <script>
 
-const supabase = window.supabase.createClient(
-"https://wqsrvwlxxhbzorgvupco.supabase.co",
-"sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6"
-)
+const supabaseUrl = "https://wqsrvwlxxhbzorgvupco.supabase.co"
+const supabaseKey = "sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6"
+const supabase = window.supabase.createClient(supabaseUrl,supabaseKey)
 
-let score=0
-let opened=0
-
-const prizes=[0,1,1,2,2,3,3,5,5,8,10,15]
-
-function getWeek(){
-let d=new Date()
-let first=new Date(d.getFullYear(),0,1)
-let week=Math.ceil((((d-first)/86400000)+first.getDay()+1)/7)
-return d.getFullYear()+"-W"+week
-}
-
-function canPlay(){
-let today=new Date().toDateString()
-let last=localStorage.getItem("played")
-
-if(last===today){
-alert("You have already played today. Come back tomorrow!")
-return false
-}
-
-return true
-}
+let coins = 0
 
 function startGame(){
 
-if(!canPlay()) return
+let lastPlay = localStorage.getItem("lastPlay")
+let today = new Date().toDateString()
 
-score=0
-opened=0
+if(lastPlay === today){
+alert("You have already played today!")
+return
+}
 
-document.getElementById("score").innerText="Coins: 0"
+localStorage.setItem("lastPlay",today)
 
-let grid=document.getElementById("grid")
-grid.innerHTML=""
+document.getElementById("game").innerHTML=""
 
-let shuffled=[...prizes].sort(()=>Math.random()-0.5)
+coins = 0
+updateCoins()
 
 for(let i=0;i<12;i++){
 
 let chest=document.createElement("div")
-
 chest.className="chest"
 chest.innerHTML="🧰"
 
 chest.onclick=function(){
 
-if(chest.classList.contains("open")) return
+let reward=Math.floor(Math.random()*5)
 
-chest.classList.add("open")
+coins+=reward
 
-let value=shuffled[i]
+this.innerHTML="🪙"
+this.onclick=null
 
-if(value===0){
-
-chest.innerHTML="❌"
-
-}else{
-
-chest.innerHTML="🪙"+value
-
-score+=value
-
-document.getElementById("score").innerText="Coins: "+score
+updateCoins()
 
 }
 
-opened++
-
-if(opened===12){
-
-finishGame()
+document.getElementById("game").appendChild(chest)
 
 }
 
 }
 
-grid.appendChild(chest)
-
+function updateCoins(){
+document.getElementById("coins").innerText=coins
 }
 
-}
+async function submitScore(){
 
-async function finishGame(){
+let name=prompt("Enter your name")
 
-localStorage.setItem("played",new Date().toDateString())
+let week=new Date().getWeek
 
-let name=prompt("Enter your Facebook name")
-
-let week=getWeek()
-
-await supabase.from("scores").insert([
-{name:name,score:score,week:week}
-])
-
-alert("You collected "+score+" coins!")
+await supabase
+.from("scores")
+.insert([{name:name,score:coins,week:week}])
 
 loadLeaderboard()
 
@@ -212,19 +133,16 @@ loadLeaderboard()
 
 async function loadLeaderboard(){
 
-let week=getWeek()
-
 let {data}=await supabase
 .from("scores")
 .select("*")
-.eq("week",week)
 .order("score",{ascending:false})
 .limit(10)
 
 let html=""
 
-data.forEach((p,i)=>{
-html+=(i+1)+". "+p.name+" - "+p.score+" coins<br>"
+data.forEach(player=>{
+html+=player.name+" - "+player.score+"<br>"
 })
 
 document.getElementById("leaderboard").innerHTML=html
