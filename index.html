@@ -1,115 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Marvalous Mystery Box</title>
-
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(180deg,#5a00b5,#8a2be2);
-color:white;
-text-align:center;
-}
-
-.container{
-padding:30px 20px;
-}
-
-h1{
-margin-top:10px;
-}
-
-button{
-background:#ffd34d;
-border:none;
-padding:14px 26px;
-font-size:18px;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
-}
-
-#game{
-display:grid;
-grid-template-columns:repeat(4,80px);
-gap:18px;
-justify-content:center;
-margin-top:25px;
-}
-
-.box{
-width:80px;
-height:80px;
-background:linear-gradient(#ffcc33,#e6a800);
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:36px;
-cursor:pointer;
-box-shadow:0 6px 0 rgba(0,0,0,0.2);
-transition:transform .2s;
-}
-
-.box:hover{
-transform:scale(1.05);
-}
-
-.result{
-margin-top:25px;
-font-size:20px;
-font-weight:bold;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>Marvalous Competitions</h1>
-<p>Mystery Box Challenge</p>
-
-<p>Open the boxes and collect coins</p>
-
-<h2>Coins: <span id="coins">0</span></h2>
-
-<button onclick="startGame()">Start Today's Hunt</button>
-
-<div id="game"></div>
-
-<div class="result" id="result"></div>
-
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-let coins=0
-let opened=0
-let total=12
+const supabaseUrl = "https://wqsrvwlxxhbzorgvupco.supabase.co"
+const supabaseKey = "sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6"
+
+const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+let coins = 0
+let opened = 0
+let total = 12
+let playerName = ""
 
 function startGame(){
 
-let lastPlay=localStorage.getItem("lastPlay")
-let today=new Date().toDateString()
+playerName = prompt("Enter your name")
 
-if(lastPlay===today){
+if(!playerName){
+alert("Name required")
+return
+}
+
+let lastPlay = localStorage.getItem("lastPlay")
+let today = new Date().toDateString()
+
+if(lastPlay === today){
 alert("You already played today")
 return
 }
 
 localStorage.setItem("lastPlay",today)
 
-coins=0
-opened=0
+coins = 0
+opened = 0
 
-document.getElementById("coins").innerText=0
-document.getElementById("game").innerHTML=""
-document.getElementById("result").innerHTML=""
+document.getElementById("coins").innerText = 0
+document.getElementById("game").innerHTML = ""
+document.getElementById("result").innerHTML = ""
 
 for(let i=0;i<12;i++){
 
@@ -126,26 +53,23 @@ if(r<0.4){
 reward=0
 this.innerHTML="❌"
 }
-
 else if(r<0.7){
 reward=1
 this.innerHTML="🪙"
 }
-
 else if(r<0.9){
 reward=3
 this.innerHTML="💰"
 }
-
 else{
 reward=10
-this.innerHTML="🏆"
+this.innerHTML="👑"
 }
 
-coins+=reward
+coins += reward
 opened++
 
-document.getElementById("coins").innerText=coins
+document.getElementById("coins").innerText = coins
 
 this.style.background="#222"
 this.onclick=null
@@ -162,18 +86,39 @@ document.getElementById("game").appendChild(box)
 
 }
 
-function endGame(){
+async function endGame(){
 
-setTimeout(function(){
+let week = new Date().getWeek
 
-document.getElementById("result").innerHTML=
-"You collected "+coins+" coins! Come back tomorrow to play again."
+await supabase
+.from("scores")
+.insert([{name:playerName,score:coins,week:week}])
 
-},600)
+document.getElementById("result").innerHTML =
+"You collected "+coins+" coins!"
+
+loadLeaderboard()
 
 }
 
-</script>
+async function loadLeaderboard(){
 
-</body>
-</html>
+let { data } = await supabase
+.from("scores")
+.select("*")
+.order("score",{ascending:false})
+.limit(10)
+
+let html=""
+
+data.forEach(p=>{
+html += p.name + " - " + p.score + "<br>"
+})
+
+document.getElementById("leaderboard").innerHTML = html
+
+}
+
+loadLeaderboard()
+
+</script>
