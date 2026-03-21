@@ -1,3 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Marvalous Competitions</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:linear-gradient(#6a00a8,#7a00c4);
+color:white;
+margin:0;
+padding:30px;
+}
+
+button{
+background:#ffc107;
+border:none;
+padding:12px 20px;
+font-size:18px;
+border-radius:8px;
+cursor:pointer;
+}
+
+#game{
+display:grid;
+grid-template-columns:repeat(4,80px);
+gap:15px;
+justify-content:center;
+margin-top:25px;
+}
+
+.chest{
+font-size:45px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Marvalous Competitions</h1>
+<h3>Treasure Chest Challenge</h3>
+
+<p>Open all chests and collect coins</p>
+<p>You can play once per day</p>
+
+<h3>Coins: <span id="coins">0</span></h3>
+
+<button onclick="startGame()">Start Today's Hunt</button>
+
+<div id="game"></div>
+
 <script>
 
 let coins = 0
@@ -10,7 +66,7 @@ let lastPlay = localStorage.getItem("lastPlay")
 let today = new Date().toDateString()
 
 if(lastPlay === today){
-alert("You have already played today")
+alert("You already played today")
 return
 }
 
@@ -20,51 +76,48 @@ document.getElementById("game").innerHTML=""
 
 coins = 0
 opened = 0
-
 updateCoins()
 
 for(let i=0;i<12;i++){
 
-let chest=document.createElement("div")
-chest.className="chest"
-chest.innerHTML="📦"
+let chest = document.createElement("div")
+chest.className = "chest"
+chest.innerHTML = "📦"
 
-chest.onclick=function(){
+chest.onclick = function(){
 
-let random = Math.random()
-
+let rand = Math.random()
 let reward = 0
 
-if(random < 0.4){
+if(rand < 0.4){
 reward = 0
-this.innerHTML="❌"
+this.innerHTML = "❌"
 }
 
-else if(random < 0.7){
+else if(rand < 0.7){
 reward = 1
-this.innerHTML="🪙"
+this.innerHTML = "🪙"
 }
 
-else if(random < 0.9){
+else if(rand < 0.9){
 reward = 3
-this.innerHTML="💰"
+this.innerHTML = "💰"
 }
 
 else{
 reward = 5
-this.innerHTML="🏆"
+this.innerHTML = "🏆"
 }
 
-coins += reward
-
-opened++
+coins = coins + reward
+opened = opened + 1
 
 updateCoins()
 
-this.onclick=null
+this.onclick = null
 
 if(opened === totalChests){
-endGame()
+finishGame()
 }
 
 }
@@ -79,16 +132,19 @@ function updateCoins(){
 document.getElementById("coins").innerText = coins
 }
 
-function endGame(){
+function finishGame(){
 
-setTimeout(()=>{
+setTimeout(function(){
 
-alert("Game finished! You collected " + coins + " coins.")
+alert("Game finished! You collected " + coins + " coins!")
 
-document.getElementById("game").innerHTML=""
+document.getElementById("game").innerHTML = ""
 
 },500)
 
 }
 
 </script>
+
+</body>
+</html>
