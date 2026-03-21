@@ -8,49 +8,80 @@
 
 body{
 margin:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 font-family:Arial;
 background:linear-gradient(180deg,#5a00b5,#8a2be2);
 color:white;
-text-align:center;
 }
 
-.container{
-padding:30px 20px;
+.gameCard{
+background:#1b0033;
+padding:40px;
+border-radius:20px;
+width:420px;
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,0.4);
 }
 
 button{
 background:#ffd34d;
 border:none;
-padding:14px 26px;
+padding:14px 30px;
 font-size:18px;
-border-radius:10px;
+border-radius:12px;
 cursor:pointer;
 font-weight:bold;
+margin-top:10px;
 }
 
 #game{
 display:grid;
-grid-template-columns:repeat(4,80px);
-gap:18px;
+grid-template-columns:repeat(4,90px);
+gap:20px;
 justify-content:center;
 margin-top:25px;
 }
 
 .box{
-width:80px;
-height:80px;
-background:#1e1e1e;
-border-radius:12px;
+width:90px;
+height:90px;
+background:#2a004d;
+border-radius:14px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:34px;
+font-size:38px;
 cursor:pointer;
+transition:transform .15s;
 }
 
-#leaderboard{
-margin-top:25px;
-font-size:18px;
+.box:active{
+transform:scale(0.9);
+}
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+display:flex;
+align-items:center;
+justify-content:center;
+visibility:hidden;
+}
+
+.modalContent{
+background:white;
+color:black;
+padding:30px;
+border-radius:14px;
+text-align:center;
+width:280px;
 }
 
 </style>
@@ -58,7 +89,7 @@ font-size:18px;
 
 <body>
 
-<div class="container">
+<div class="gameCard">
 
 <h1>Marvalous Competitions</h1>
 <p>Mystery Box Challenge</p>
@@ -69,47 +100,45 @@ font-size:18px;
 
 <div id="game"></div>
 
-<div id="result"></div>
+</div>
 
-<h3>Top Players</h3>
-<div id="leaderboard"></div>
+
+<div class="modal" id="resultModal">
+<div class="modalContent">
+
+<h2 id="finalCoins"></h2>
+
+<p>Come back tomorrow to play again!</p>
+
+<button onclick="closeModal()">OK</button>
 
 </div>
+</div>
+
 
 <script>
 
-let coins = 0
-let opened = 0
-let total = 12
-let playerName = ""
-
-let scores = []
+let coins=0
+let opened=0
+let total=12
 
 function startGame(){
 
-playerName = prompt("Enter your name")
+let lastPlay=localStorage.getItem("lastPlay")
+let today=new Date().toDateString()
 
-if(!playerName){
-alert("Name required")
-return
-}
-
-let lastPlay = localStorage.getItem("lastPlay")
-let today = new Date().toDateString()
-
-if(lastPlay === today){
+if(lastPlay===today){
 alert("You already played today")
 return
 }
 
 localStorage.setItem("lastPlay",today)
 
-coins = 0
-opened = 0
+coins=0
+opened=0
 
-document.getElementById("coins").innerText = 0
-document.getElementById("game").innerHTML = ""
-document.getElementById("result").innerHTML = ""
+document.getElementById("coins").innerText=0
+document.getElementById("game").innerHTML=""
 
 for(let i=0;i<12;i++){
 
@@ -139,15 +168,15 @@ reward=10
 this.innerHTML="👑"
 }
 
-coins += reward
+coins+=reward
 opened++
 
-document.getElementById("coins").innerText = coins
+document.getElementById("coins").innerText=coins
 
 this.onclick=null
 
 if(opened===total){
-endGame()
+finishGame()
 }
 
 }
@@ -158,33 +187,18 @@ document.getElementById("game").appendChild(box)
 
 }
 
-function endGame(){
+function finishGame(){
 
-scores.push({
-name:playerName,
-score:coins
-})
-
-scores.sort((a,b)=>b.score-a.score)
-
-scores = scores.slice(0,10)
-
-updateLeaderboard()
-
-document.getElementById("result").innerHTML =
+document.getElementById("finalCoins").innerText=
 "You collected "+coins+" coins!"
+
+document.getElementById("resultModal").style.visibility="visible"
 
 }
 
-function updateLeaderboard(){
+function closeModal(){
 
-let html=""
-
-scores.forEach(player=>{
-html += player.name + " - " + player.score + "<br>"
-})
-
-document.getElementById("leaderboard").innerHTML = html
+document.getElementById("resultModal").style.visibility="hidden"
 
 }
 
