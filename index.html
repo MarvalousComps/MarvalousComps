@@ -349,7 +349,21 @@ document.getElementById("leaderboard").innerHTML=html
 window.restart=function(){
 switchScreen("startScreen")
 }
+window.shareWin = function(){
 
+const text = playerName + " just won " + coins + " coins on the Marvalous Competitions spin wheel!";
+
+const url = "https://marvalouscomps.github.io/MarvalousComps/";
+
+const shareURL =
+"https://www.facebook.com/sharer/sharer.php?u=" +
+encodeURIComponent(url) +
+"&quote=" +
+encodeURIComponent(text);
+
+window.open(shareURL,"_blank");
+
+}
 
 function confetti(){
 
