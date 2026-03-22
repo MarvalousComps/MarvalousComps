@@ -4,15 +4,7 @@
 
 <title>Marvalous Competitions</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta property="og:title" content="Marvalous Competitions Spin Wheel">
 
-<meta property="og:description" content="Spin the wheel daily to win coins and climb the leaderboard!">
-
-<meta property="og:image" content="https://marvalouscomps.github.io/MarvalousComps/wheel-preview.png">
-
-<meta property="og:url" content="https://marvalouscomps.github.io/MarvalousComps/">
-
-<meta property="og:type" content="website">
 <style>
 
 body{
@@ -187,10 +179,10 @@ margin-top:-5px;
 <div id="resultScreen" class="screen">
 
 <h2 id="result"></h2>
-<button onclick="shareWin()">Share On Facebook</button>
+
 <button onclick="showLeaderboard()">View Leaderboard</button>
+
 </div>
-  
 
 
 <div id="leaderboardScreen" class="screen">
@@ -354,26 +346,10 @@ document.getElementById("leaderboard").innerHTML=html
 }
 
 
-window.shareWin = function(){
-
-const score = coins
-const name = playerName
-
-const link =
-"https://marvalouscomps.github.io/MarvalousComps/?challenge=" +
-score +
-"&player=" +
-encodeURIComponent(name)
-
-const shareURL =
-"https://www.facebook.com/sharer/sharer.php?u=" +
-encodeURIComponent(link)
-
-window.open(shareURL,"_blank")
-
+window.restart=function(){
+switchScreen("startScreen")
 }
 
-}
 
 function confetti(){
 
