@@ -350,7 +350,21 @@ window.restart=function(){
 switchScreen("startScreen")
 }
 
+window.shareWin=function(){
 
+const link =
+"https://marvalouscomps.github.io/MarvalousComps/?challenge=" +
+coins +
+"&player=" +
+encodeURIComponent(playerName)
+
+const shareURL =
+"https://www.facebook.com/sharer/sharer.php?u=" +
+encodeURIComponent(link)
+
+window.open(shareURL,"_blank")
+
+}
 function confetti(){
 
 const canvas=document.getElementById("confetti")
