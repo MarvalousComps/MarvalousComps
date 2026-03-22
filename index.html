@@ -28,10 +28,7 @@ box-shadow:0 25px 60px rgba(0,0,0,0.6);
 text-align:center;
 }
 
-.logo{
-width:220px;
-margin-bottom:10px;
-}
+.logo{width:220px;margin-bottom:10px;}
 
 input{
 width:85%;
@@ -58,45 +55,41 @@ box-shadow:0 6px 14px rgba(0,0,0,0.4);
 .screen{display:none}
 .active{display:block}
 
-.info{
-font-size:14px;
-opacity:0.9;
-margin-top:-5px;
-}
+.pointer{font-size:36px}
 
-.wheelContainer{
-position:relative;
-width:320px;
-margin:20px auto;
-}
-
-.wheelImage{
-width:320px;
-transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
-}
-
-.pointer{
-font-size:34px;
-position:absolute;
-top:-25px;
-left:50%;
-transform:translateX(-50%);
-}
-
-.spinButton{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:gold;
-border:none;
+.wheel{
+width:300px;
+height:300px;
 border-radius:50%;
+margin:20px auto;
+border:14px solid gold;
+background:conic-gradient(
+#ffffff 0deg 45deg,
+#8c42ff 45deg 90deg,
+#ffffff 90deg 135deg,
+#8c42ff 135deg 180deg,
+#ffffff 180deg 225deg,
+#8c42ff 225deg 270deg,
+#ffffff 270deg 315deg,
+#8c42ff 315deg 360deg
+);
+transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.center{
+background:gold;
 width:90px;
 height:90px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
 font-weight:bold;
+color:black;
 font-size:20px;
-cursor:pointer;
-box-shadow:0 0 10px rgba(0,0,0,0.5);
 }
 
 .leaderboardPanel{
@@ -125,6 +118,12 @@ left:0;
 pointer-events:none;
 }
 
+.info{
+font-size:14px;
+opacity:0.9;
+margin-top:-5px;
+}
+
 </style>
 
 </head>
@@ -148,30 +147,20 @@ pointer-events:none;
 
 </div>
 
-
 <div id="gameScreen" class="screen">
+<div class="pointer">⬇</div>
 
-<div class="wheelContainer">
-
-<div class="pointer">▼</div>
-
-<img id="wheel" src="wheel.png" class="wheelImage">
-
-<button class="spinButton" onclick="spinWheel()">SPIN</button>
-
+<div id="wheel" class="wheel">
+<div class="center">SPIN</div>
 </div>
 
+<button onclick="spinWheel()">SPIN NOW</button>
 </div>
-
 
 <div id="resultScreen" class="screen">
-
 <h2 id="result"></h2>
-
 <button onclick="showLeaderboard()">View Leaderboard</button>
-
 </div>
-
 
 <div id="leaderboardScreen" class="screen">
 
@@ -187,18 +176,15 @@ pointer-events:none;
 
 </div>
 
-
 <canvas id="confetti"></canvas>
 
 <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-wheel-1934.mp3"></audio>
 <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
 
-
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
 
 const firebaseConfig = {
 apiKey: "AIzaSyCDAvHpStaZxpmELOKuXdIB5oUF90V_dL4",
@@ -217,7 +203,7 @@ let coins=0
 
 const rewards=[0,5,10,20,50,0,15,100]
 
-/* DEVICE ID */
+/* DEVICE ID SYSTEM */
 
 function getDeviceID(){
 
@@ -260,8 +246,6 @@ document.getElementById(screen).classList.add("active")
 
 }
 
-/* START */
-
 window.startGame=function(){
 
 playerName=document.getElementById("playerName").value.trim()
@@ -288,8 +272,6 @@ switchScreen("gameScreen")
 
 }
 
-/* SPIN */
-
 window.spinWheel=function(){
 
 document.getElementById("spinSound").play()
@@ -312,9 +294,9 @@ finishGame()
 
 }
 
-/* FINISH */
-
 async function finishGame(){
+
+/* VALIDATE SCORE */
 
 if(coins>100) coins=100
 if(coins<0) coins=0
@@ -339,8 +321,6 @@ time:new Date()
 })
 
 }
-
-/* LEADERBOARD */
 
 window.showLeaderboard=async function(){
 
@@ -384,13 +364,9 @@ document.getElementById("leaderboard").innerHTML=html
 
 }
 
-/* RESTART */
-
 window.restart=function(){
 switchScreen("startScreen")
 }
-
-/* CONFETTI */
 
 function confetti(){
 
