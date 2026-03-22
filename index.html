@@ -22,7 +22,6 @@ color:white;
 }
 
 .app{
-
 width:420px;
 max-width:95%;
 background:#3c1191;
@@ -30,7 +29,6 @@ border-radius:24px;
 padding:25px;
 box-shadow:0 20px 50px rgba(0,0,0,0.5);
 text-align:center;
-
 }
 
 .logo{
@@ -73,13 +71,11 @@ font-size:36px;
 }
 
 .wheel{
-
 width:280px;
 height:280px;
 border-radius:50%;
 margin:20px auto;
 border:14px solid gold;
-
 background:conic-gradient(
 #ffffff 0deg 45deg,
 #8c42ff 45deg 90deg,
@@ -90,13 +86,10 @@ background:conic-gradient(
 #ffffff 270deg 315deg,
 #8c42ff 315deg 360deg
 );
-
 display:flex;
 align-items:center;
 justify-content:center;
-
 transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
-
 }
 
 .center{
@@ -133,11 +126,9 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 <body>
 
-
 <div class="app">
 
 <img src="Logo.jpg" class="logo">
-
 
 <!-- START SCREEN -->
 
@@ -153,7 +144,6 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
-
 <!-- GAME SCREEN -->
 
 <div id="gameScreen" class="screen">
@@ -161,17 +151,14 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 <div class="pointer">⬇</div>
 
 <div id="wheel" class="wheel">
-
 <div class="center">SPIN</div>
-
 </div>
 
 <button onclick="spinWheel()">SPIN NOW</button>
 
 </div>
 
-
-<!-- RESULT -->
+<!-- RESULT SCREEN -->
 
 <div id="resultScreen" class="screen">
 
@@ -181,17 +168,14 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
-
-<!-- LEADERBOARD -->
+<!-- LEADERBOARD SCREEN -->
 
 <div id="leaderboardScreen" class="screen">
 
 <h2>Top Players</h2>
 
 <div class="leaderboard">
-
 <div id="leaderboard"></div>
-
 </div>
 
 <button onclick="restart()">Back</button>
@@ -222,7 +206,6 @@ document.getElementById(screen).classList.add("active")
 
 }
 
-
 function startGame(){
 
 playerName=document.getElementById("playerName").value
@@ -240,7 +223,6 @@ return
 switchScreen("gameScreen")
 
 }
-
 
 function spinWheel(){
 
@@ -262,7 +244,6 @@ finishGame()
 
 }
 
-
 async function finishGame(){
 
 localStorage.setItem("played",new Date().toDateString())
@@ -278,12 +259,11 @@ await supabaseClient
 
 }
 
-
 async function showLeaderboard(){
 
 switchScreen("leaderboardScreen")
 
-let { data, error } = await supabaseClient
+const { data, error } = await supabaseClient
 .from("Scores")
 .select("*")
 .order("score",{ascending:false})
@@ -291,8 +271,17 @@ let { data, error } = await supabaseClient
 
 let html=""
 
+if(error){
+html="Error loading leaderboard"
+console.log(error)
+document.getElementById("leaderboard").innerHTML=html
+return
+}
+
 if(!data || data.length===0){
-html="No scores yet"
+html="No players yet. Be the first to spin!"
+document.getElementById("leaderboard").innerHTML=html
+return
 }
 
 data.forEach((p,i)=>{
@@ -316,7 +305,6 @@ html+=`
 document.getElementById("leaderboard").innerHTML=html
 
 }
-
 
 function restart(){
 
