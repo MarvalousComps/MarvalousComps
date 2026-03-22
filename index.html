@@ -359,17 +359,19 @@ switchScreen("startScreen")
 }
 window.shareWin = function(){
 
-const text = playerName + " just won " + coins + " coins on the Marvalous Competitions spin wheel!";
+const score = coins
+const name = playerName
 
-const url = "https://marvalouscomps.github.io/MarvalousComps/";
+const link = "https://marvalouscomps.github.io/MarvalousComps/?challenge=" + score + "&player=" + encodeURIComponent(name)
 
-const shareURL =
-"https://www.facebook.com/sharer/sharer.php?u=" +
-encodeURIComponent(url) +
-"&quote=" +
-encodeURIComponent(text);
+const message =
+name + " just won " + score + " coins on the Marvalous Competitions Spin Wheel! 🎉\n\nThink you can beat me?\n\n" + link
 
-window.open(shareURL,"_blank");
+navigator.clipboard.writeText(message)
+
+window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(link),"_blank")
+
+alert("Your result has been copied. Paste it into the Facebook post!")
 
 }
 
