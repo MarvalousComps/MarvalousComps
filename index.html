@@ -58,41 +58,45 @@ box-shadow:0 6px 14px rgba(0,0,0,0.4);
 .screen{display:none}
 .active{display:block}
 
-.pointer{font-size:36px}
-
-.wheel{
-width:300px;
-height:300px;
-border-radius:50%;
-margin:20px auto;
-border:14px solid gold;
-background:conic-gradient(
-#ffffff 0deg 45deg,
-#8c42ff 45deg 90deg,
-#ffffff 90deg 135deg,
-#8c42ff 135deg 180deg,
-#ffffff 180deg 225deg,
-#8c42ff 225deg 270deg,
-#ffffff 270deg 315deg,
-#8c42ff 315deg 360deg
-);
-transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
-display:flex;
-align-items:center;
-justify-content:center;
+.info{
+font-size:14px;
+opacity:0.9;
+margin-top:-5px;
 }
 
-.center{
+.wheelContainer{
+position:relative;
+width:320px;
+margin:20px auto;
+}
+
+.wheelImage{
+width:320px;
+transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
+}
+
+.pointer{
+font-size:34px;
+position:absolute;
+top:-25px;
+left:50%;
+transform:translateX(-50%);
+}
+
+.spinButton{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
 background:gold;
+border:none;
+border-radius:50%;
 width:90px;
 height:90px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
 font-weight:bold;
-color:black;
 font-size:20px;
+cursor:pointer;
+box-shadow:0 0 10px rgba(0,0,0,0.5);
 }
 
 .leaderboardPanel{
@@ -121,12 +125,6 @@ left:0;
 pointer-events:none;
 }
 
-.info{
-font-size:14px;
-opacity:0.9;
-margin-top:-5px;
-}
-
 </style>
 
 </head>
@@ -153,13 +151,15 @@ margin-top:-5px;
 
 <div id="gameScreen" class="screen">
 
-<div class="pointer">⬇</div>
+<div class="wheelContainer">
 
-<div id="wheel" class="wheel">
-<div class="center">SPIN</div>
+<div class="pointer">▼</div>
+
+<img id="wheel" src="wheel.png" class="wheelImage">
+
+<button class="spinButton" onclick="spinWheel()">SPIN</button>
+
 </div>
-
-<button onclick="spinWheel()">SPIN NOW</button>
 
 </div>
 
@@ -197,7 +197,7 @@ margin-top:-5px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -212,21 +212,55 @@ appId: "1:700932522616:web:3a42098a71960894e4638d"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-
 let playerName=""
 let coins=0
 
 const rewards=[0,5,10,20,50,0,15,100]
 
+/* DEVICE ID */
+
+function getDeviceID(){
+
+let id=localStorage.getItem("deviceID")
+
+if(!id){
+id=crypto.randomUUID()
+localStorage.setItem("deviceID",id)
+}
+
+return id
+}
+
+const deviceID=getDeviceID()
+
+/* WEEK SYSTEM */
+
+function getWeekID(){
+
+const now=new Date()
+const sunday=new Date(now)
+
+sunday.setDate(now.getDate()-now.getDay())
+sunday.setHours(20,0,0,0)
+
+if(now<sunday){
+sunday.setDate(sunday.getDate()-7)
+}
+
+return sunday.toISOString().split("T")[0]
+
+}
+
+/* SCREEN SWITCH */
 
 function switchScreen(screen){
 
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"))
-
 document.getElementById(screen).classList.add("active")
 
 }
 
+/* START */
 
 window.startGame=function(){
 
@@ -235,6 +269,14 @@ playerName=document.getElementById("playerName").value.trim()
 if(playerName==""){
 alert("Enter your Facebook name")
 return
+}
+
+let savedName=localStorage.getItem("lockedName")
+
+if(!savedName){
+localStorage.setItem("lockedName",playerName)
+}else{
+playerName=savedName
 }
 
 if(localStorage.getItem("played")==new Date().toDateString()){
@@ -246,6 +288,7 @@ switchScreen("gameScreen")
 
 }
 
+/* SPIN */
 
 window.spinWheel=function(){
 
@@ -269,8 +312,12 @@ finishGame()
 
 }
 
+/* FINISH */
 
 async function finishGame(){
+
+if(coins>100) coins=100
+if(coins<0) coins=0
 
 localStorage.setItem("played",new Date().toDateString())
 
@@ -286,11 +333,14 @@ confetti()
 await addDoc(collection(db,"scores"),{
 name:playerName,
 score:coins,
+device:deviceID,
+week:getWeekID(),
 time:new Date()
 })
 
 }
 
+/* LEADERBOARD */
 
 window.showLeaderboard=async function(){
 
@@ -298,6 +348,7 @@ switchScreen("leaderboardScreen")
 
 const q=query(
 collection(db,"scores"),
+where("week","==",getWeekID()),
 orderBy("score","desc"),
 limit(10)
 )
@@ -333,11 +384,13 @@ document.getElementById("leaderboard").innerHTML=html
 
 }
 
+/* RESTART */
 
 window.restart=function(){
 switchScreen("startScreen")
 }
 
+/* CONFETTI */
 
 function confetti(){
 
