@@ -13,11 +13,11 @@
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(#6e21d1,#2b0759);
+background:linear-gradient(#5b1dbf,#1c0647);
 color:white;
 display:flex;
-align-items:center;
 justify-content:center;
+align-items:center;
 height:100vh;
 text-align:center;
 }
@@ -28,7 +28,7 @@ max-width:95%;
 }
 
 .logo{
-width:280px;
+width:260px;
 margin-bottom:10px;
 }
 
@@ -37,58 +37,20 @@ padding:12px;
 width:80%;
 border-radius:8px;
 border:none;
-margin-bottom:15px;
+margin-bottom:20px;
 font-size:16px;
 text-align:center;
 }
 
 button{
-background:#ffd84d;
+background:linear-gradient(#ffd84d,#ffb300);
 border:none;
-padding:14px 26px;
-border-radius:10px;
-font-size:16px;
+padding:16px 28px;
+border-radius:12px;
+font-size:18px;
 font-weight:bold;
 cursor:pointer;
-margin-top:10px;
-transition:0.2s;
-}
-
-button:hover{
-transform:scale(1.05);
-}
-
-.grid{
-margin-top:30px;
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:14px;
-}
-
-.box{
-background:#1c1c1c;
-border-radius:14px;
-height:85px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:30px;
-cursor:pointer;
-transition:0.2s;
 box-shadow:0 4px 10px rgba(0,0,0,0.4);
-}
-
-.box:hover{
-transform:scale(1.08);
-}
-
-.coin{
-animation:pop 0.3s ease;
-}
-
-@keyframes pop{
-0%{transform:scale(0.6)}
-100%{transform:scale(1)}
 }
 
 .screen{
@@ -99,6 +61,52 @@ display:none;
 display:block;
 }
 
+.pointer{
+font-size:34px;
+margin-bottom:-10px;
+}
+
+.wheel-wrapper{
+position:relative;
+margin:auto;
+width:280px;
+height:280px;
+}
+
+#wheel{
+width:100%;
+height:100%;
+border-radius:50%;
+border:12px solid gold;
+background:conic-gradient(
+#ffffff 0deg 45deg,
+#8a39ff 45deg 90deg,
+#ffffff 90deg 135deg,
+#8a39ff 135deg 180deg,
+#ffffff 180deg 225deg,
+#8a39ff 225deg 270deg,
+#ffffff 270deg 315deg,
+#8a39ff 315deg 360deg
+);
+transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.wheel-center{
+width:70px;
+height:70px;
+background:gold;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+color:black;
+font-weight:bold;
+}
+
 .leaderboard{
 margin-top:20px;
 background:rgba(0,0,0,0.4);
@@ -106,8 +114,16 @@ padding:15px;
 border-radius:12px;
 }
 
+.row{
+display:flex;
+justify-content:space-between;
+padding:6px 0;
+border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
 </style>
 </head>
+
 
 <body>
 
@@ -119,13 +135,13 @@ border-radius:12px;
 
 <div id="startScreen" class="screen active">
 
-<h2>Treasure Box Challenge</h2>
+<h2>Spin The Wheel</h2>
 
 <input id="playerName" placeholder="Enter your name">
 
 <br>
 
-<button onclick="startGame()">Start Today's Hunt</button>
+<button onclick="startGame()">Play Today's Spin</button>
 
 </div>
 
@@ -134,14 +150,26 @@ border-radius:12px;
 
 <div id="gameScreen" class="screen">
 
-<h3 id="score">Coins: 0</h3>
+<div class="pointer">⬇️</div>
 
-<div id="game" class="grid"></div>
+<div class="wheel-wrapper">
+
+<div id="wheel">
+
+<div class="wheel-center">SPIN</div>
+
+</div>
+
+</div>
+
+<br>
+
+<button onclick="spinWheel()">SPIN NOW</button>
 
 </div>
 
 
-<!-- RESULT SCREEN -->
+<!-- RESULT -->
 
 <div id="resultScreen" class="screen">
 
@@ -152,7 +180,7 @@ border-radius:12px;
 </div>
 
 
-<!-- LEADERBOARD SCREEN -->
+<!-- LEADERBOARD -->
 
 <div id="leaderboardScreen" class="screen">
 
@@ -166,11 +194,12 @@ border-radius:12px;
 
 <br>
 
-<button onclick="restartGame()">Play Again Tomorrow</button>
+<button onclick="restart()">Back</button>
 
 </div>
 
 </div>
+
 
 
 <script>
@@ -181,9 +210,10 @@ const SUPABASE_KEY="sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6eyJhbGciOiJIUz
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
 
-let coins=0
-let opened=0
 let playerName=""
+let coins=0
+
+const rewards=[0,5,10,20,50,5,15,25]
 
 function switchScreen(screen){
 
@@ -192,6 +222,7 @@ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"))
 document.getElementById(screen).classList.add("active")
 
 }
+
 
 function startGame(){
 
@@ -209,66 +240,29 @@ return
 
 switchScreen("gameScreen")
 
-coins=0
-opened=0
-
-document.getElementById("score").innerText="Coins: 0"
-
-const game=document.getElementById("game")
-
-game.innerHTML=""
-
-for(let i=0;i<12;i++){
-
-let box=document.createElement("div")
-
-box.className="box"
-
-box.innerHTML="🎁"
-
-box.onclick=function(){
-
-if(box.classList.contains("opened")) return
-
-box.classList.add("opened")
-
-let r=Math.random()
-
-if(r<0.5){
-
-box.innerHTML="<span class='coin'>🪙</span>"
-coins+=5
-
-}
-else if(r<0.7){
-
-box.innerHTML="<span class='coin'>💰</span>"
-coins+=10
-
-}
-else{
-
-box.innerHTML="❌"
-
 }
 
-opened++
 
-document.getElementById("score").innerText="Coins: "+coins
+function spinWheel(){
 
-if(opened==12){
+const wheel=document.getElementById("wheel")
+
+let spin=3600+Math.floor(Math.random()*360)
+
+wheel.style.transform="rotate("+spin+"deg)"
+
+setTimeout(()=>{
+
+let reward=rewards[Math.floor(Math.random()*rewards.length)]
+
+coins=reward
 
 finishGame()
 
-}
+},4000)
 
 }
 
-game.appendChild(box)
-
-}
-
-}
 
 async function finishGame(){
 
@@ -277,13 +271,14 @@ localStorage.setItem("played",new Date().toDateString())
 switchScreen("resultScreen")
 
 document.getElementById("result").innerText=
-playerName+" collected "+coins+" coins!"
+playerName+" won "+coins+" coins!"
 
 await supabaseClient
 .from("scores")
 .insert([{name:playerName,score:coins}])
 
 }
+
 
 async function showLeaderboard(){
 
@@ -307,7 +302,7 @@ else if(i==2) medal="🥉"
 else medal=(i+1)+"."
 
 html+=`
-<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2)">
+<div class="row">
 <span>${medal} ${p.name}</span>
 <span>${p.score}</span>
 </div>
@@ -319,7 +314,8 @@ document.getElementById("leaderboard").innerHTML=html
 
 }
 
-function restartGame(){
+
+function restart(){
 
 switchScreen("startScreen")
 
