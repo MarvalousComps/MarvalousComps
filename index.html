@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -76,6 +76,7 @@ height:280px;
 border-radius:50%;
 margin:20px auto;
 border:14px solid gold;
+
 background:conic-gradient(
 #ffffff 0deg 45deg,
 #8c42ff 45deg 90deg,
@@ -86,6 +87,7 @@ background:conic-gradient(
 #ffffff 270deg 315deg,
 #8c42ff 315deg 360deg
 );
+
 display:flex;
 align-items:center;
 justify-content:center;
@@ -144,6 +146,7 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
+
 <!-- GAME SCREEN -->
 
 <div id="gameScreen" class="screen">
@@ -158,6 +161,7 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
+
 <!-- RESULT SCREEN -->
 
 <div id="resultScreen" class="screen">
@@ -167,6 +171,7 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 <button onclick="showLeaderboard()">View Leaderboard</button>
 
 </div>
+
 
 <!-- LEADERBOARD SCREEN -->
 
@@ -191,7 +196,8 @@ const SUPABASE_URL="https://wqsrvwlxxhbzorgvupco.supabase.co"
 
 const SUPABASE_KEY="sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3J2d2x4eGhiem9yZ3Z1cGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDk2ODcsImV4cCI6MjA4OTY4NTY4N30.-o8uBa0P320bK7rPV3pwwVScVM7mCAnlMMTcG_HMjEg"
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+const { createClient } = supabase
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let playerName=""
 let coins=0
@@ -263,26 +269,26 @@ async function showLeaderboard(){
 
 switchScreen("leaderboardScreen")
 
+try{
+
 const { data, error } = await supabaseClient
 .from("Scores")
-.select("*")
+.select("name,score")
 .order("score",{ascending:false})
 .limit(10)
 
-let html=""
-
 if(error){
-html="Error loading leaderboard"
+document.getElementById("leaderboard").innerHTML="Leaderboard failed to load"
 console.log(error)
-document.getElementById("leaderboard").innerHTML=html
 return
 }
 
 if(!data || data.length===0){
-html="No players yet. Be the first to spin!"
-document.getElementById("leaderboard").innerHTML=html
+document.getElementById("leaderboard").innerHTML="No players yet. Be the first!"
 return
 }
+
+let html=""
 
 data.forEach((p,i)=>{
 
@@ -303,6 +309,14 @@ html+=`
 })
 
 document.getElementById("leaderboard").innerHTML=html
+
+}
+catch(e){
+
+document.getElementById("leaderboard").innerHTML="Leaderboard error"
+console.log(e)
+
+}
 
 }
 
