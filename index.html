@@ -13,7 +13,7 @@
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(180deg,#5b1fd0,#1b0347);
+background:linear-gradient(180deg,#6a1bd1,#220657);
 display:flex;
 justify-content:center;
 align-items:center;
@@ -24,7 +24,7 @@ color:white;
 .app{
 width:420px;
 max-width:95%;
-background:#3c1191;
+background:#3d1195;
 border-radius:24px;
 padding:25px;
 box-shadow:0 20px 50px rgba(0,0,0,0.5);
@@ -91,6 +91,7 @@ background:conic-gradient(
 display:flex;
 align-items:center;
 justify-content:center;
+
 transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
 }
 
@@ -154,7 +155,9 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 <div class="pointer">⬇</div>
 
 <div id="wheel" class="wheel">
+
 <div class="center">SPIN</div>
+
 </div>
 
 <button onclick="spinWheel()">SPIN NOW</button>
@@ -173,14 +176,16 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 </div>
 
 
-<!-- LEADERBOARD SCREEN -->
+<!-- LEADERBOARD -->
 
 <div id="leaderboardScreen" class="screen">
 
 <h2>Top Players</h2>
 
 <div class="leaderboard">
+
 <div id="leaderboard"></div>
+
 </div>
 
 <button onclick="restart()">Back</button>
@@ -197,7 +202,8 @@ const SUPABASE_URL="https://wqsrvwlxxhbzorgvupco.supabase.co"
 const SUPABASE_KEY="sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3J2d2x4eGhiem9yZ3Z1cGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDk2ODcsImV4cCI6MjA4OTY4NTY4N30.-o8uBa0P320bK7rPV3pwwVScVM7mCAnlMMTcG_HMjEg"
 
 const { createClient } = supabase
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+const supabaseClient = createClient(SUPABASE_URL,SUPABASE_KEY)
 
 let playerName=""
 let coins=0
@@ -273,7 +279,7 @@ try{
 
 const { data, error } = await supabaseClient
 .from("Scores")
-.select("name,score")
+.select("*")
 .order("score",{ascending:false})
 .limit(10)
 
