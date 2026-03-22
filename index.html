@@ -6,8 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
 <style>
 
 body{
@@ -133,8 +131,6 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 <img src="Logo.jpg" class="logo">
 
-<!-- START SCREEN -->
-
 <div id="startScreen" class="screen active">
 
 <h2>Spin The Wheel</h2>
@@ -147,8 +143,6 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
-
-<!-- GAME SCREEN -->
 
 <div id="gameScreen" class="screen">
 
@@ -165,8 +159,6 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 </div>
 
 
-<!-- RESULT SCREEN -->
-
 <div id="resultScreen" class="screen">
 
 <h2 id="result"></h2>
@@ -175,8 +167,6 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
-
-<!-- LEADERBOARD -->
 
 <div id="leaderboardScreen" class="screen">
 
@@ -195,15 +185,23 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 </div>
 
 
-<script>
+<script type="module">
 
-const SUPABASE_URL="https://wqsrvwlxxhbzorgvupco.supabase.co"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-const SUPABASE_KEY="sb_publishable_w_Bd1es3ifZ7PXnxnJfc_w_dcxlmiO6eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3J2d2x4eGhiem9yZ3Z1cGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDk2ODcsImV4cCI6MjA4OTY4NTY4N30.-o8uBa0P320bK7rPV3pwwVScVM7mCAnlMMTcG_HMjEg"
+const firebaseConfig = {
+  apiKey: "AIzaSyCDAvHpStaZxpmELOKuXdIB5oUF90V_dL4",
+  authDomain: "marvalousspin.firebaseapp.com",
+  projectId: "marvalousspin",
+  storageBucket: "marvalousspin.firebasestorage.app",
+  messagingSenderId: "700932522616",
+  appId: "1:700932522616:web:3a42098a71960894e4638d",
+  measurementId: "G-3Y3TVZXKLS"
+};
 
-const { createClient } = supabase
-
-const supabaseClient = createClient(SUPABASE_URL,SUPABASE_KEY)
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 let playerName=""
 let coins=0
@@ -218,7 +216,7 @@ document.getElementById(screen).classList.add("active")
 
 }
 
-function startGame(){
+window.startGame=function(){
 
 playerName=document.getElementById("playerName").value
 
@@ -236,7 +234,7 @@ switchScreen("gameScreen")
 
 }
 
-function spinWheel(){
+window.spinWheel=function(){
 
 const wheel=document.getElementById("wheel")
 
@@ -265,38 +263,33 @@ switchScreen("resultScreen")
 document.getElementById("result").innerText=
 playerName+" won "+coins+" coins!"
 
-await supabaseClient
-.from("Scores")
-.insert([{name:playerName,score:coins,week:"week1"}])
+await addDoc(collection(db,"scores"),{
+name:playerName,
+score:coins,
+time:new Date()
+})
 
 }
 
-async function showLeaderboard(){
+window.showLeaderboard=async function(){
 
 switchScreen("leaderboardScreen")
 
-try{
+const q=query(
+collection(db,"scores"),
+orderBy("score","desc"),
+limit(10)
+)
 
-const { data, error } = await supabaseClient
-.from("Scores")
-.select("*")
-.order("score",{ascending:false})
-.limit(10)
-
-if(error){
-document.getElementById("leaderboard").innerHTML="Leaderboard failed to load"
-console.log(error)
-return
-}
-
-if(!data || data.length===0){
-document.getElementById("leaderboard").innerHTML="No players yet. Be the first!"
-return
-}
+const snapshot=await getDocs(q)
 
 let html=""
 
-data.forEach((p,i)=>{
+let i=0
+
+snapshot.forEach(doc=>{
+
+const p=doc.data()
 
 let medal=""
 
@@ -312,21 +305,15 @@ html+=`
 </div>
 `
 
+i++
+
 })
 
 document.getElementById("leaderboard").innerHTML=html
 
 }
-catch(e){
 
-document.getElementById("leaderboard").innerHTML="Leaderboard error"
-console.log(e)
-
-}
-
-}
-
-function restart(){
+window.restart=function(){
 
 switchScreen("startScreen")
 
