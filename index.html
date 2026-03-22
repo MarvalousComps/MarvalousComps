@@ -63,23 +63,9 @@ box-shadow:0 6px 14px rgba(0,0,0,0.4);
 .wheel{
 width:300px;
 height:300px;
-border-radius:50%;
 margin:20px auto;
-border:14px solid gold;
-background:conic-gradient(
-#ffffff 0deg 45deg,
-#8c42ff 45deg 90deg,
-#ffffff 90deg 135deg,
-#8c42ff 135deg 180deg,
-#ffffff 180deg 225deg,
-#8c42ff 225deg 270deg,
-#ffffff 270deg 315deg,
-#8c42ff 315deg 360deg
-);
+background:url("wheel.png") center/contain no-repeat;
 transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
-display:flex;
-align-items:center;
-justify-content:center;
 }
 
 .center{
