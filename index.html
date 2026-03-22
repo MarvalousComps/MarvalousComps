@@ -285,7 +285,7 @@ async function showLeaderboard(){
 switchScreen("leaderboardScreen")
 
 let { data } = await supabaseClient
-.from("scores")
+.from("Scores")
 .select("*")
 .order("score",{ascending:false})
 .limit(10)
