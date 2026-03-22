@@ -28,7 +28,10 @@ box-shadow:0 25px 60px rgba(0,0,0,0.6);
 text-align:center;
 }
 
-.logo{width:220px;margin-bottom:10px;}
+.logo{
+width:220px;
+margin-bottom:10px;
+}
 
 input{
 width:85%;
@@ -55,41 +58,35 @@ box-shadow:0 6px 14px rgba(0,0,0,0.4);
 .screen{display:none}
 .active{display:block}
 
-.pointer{font-size:36px}
-
-.wheel{
-width:300px;
-height:300px;
-border-radius:50%;
-margin:20px auto;
-border:14px solid gold;
-background:conic-gradient(
-#ffffff 0deg 45deg,
-#8c42ff 45deg 90deg,
-#ffffff 90deg 135deg,
-#8c42ff 135deg 180deg,
-#ffffff 180deg 225deg,
-#8c42ff 225deg 270deg,
-#ffffff 270deg 315deg,
-#8c42ff 315deg 360deg
-);
-transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
-display:flex;
-align-items:center;
-justify-content:center;
+.pointer{
+font-size:34px;
+margin-bottom:-10px;
 }
 
-.center{
+.wheelContainer{
+position:relative;
+width:320px;
+margin:auto;
+}
+
+.wheelImage{
+width:320px;
+transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
+}
+
+.spinButton{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
 background:gold;
+border:none;
+border-radius:50%;
 width:90px;
 height:90px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-color:black;
 font-size:20px;
+font-weight:bold;
+cursor:pointer;
 }
 
 .leaderboardPanel{
@@ -147,20 +144,30 @@ margin-top:-5px;
 
 </div>
 
+
 <div id="gameScreen" class="screen">
-<div class="pointer">⬇</div>
 
-<div id="wheel" class="wheel">
-<div class="center">SPIN</div>
+<div class="pointer">▼</div>
+
+<div class="wheelContainer">
+
+<img id="wheel" src="wheel.png" class="wheelImage">
+
+<button class="spinButton" onclick="spinWheel()">SPIN</button>
+
 </div>
 
-<button onclick="spinWheel()">SPIN NOW</button>
 </div>
+
 
 <div id="resultScreen" class="screen">
+
 <h2 id="result"></h2>
+
 <button onclick="showLeaderboard()">View Leaderboard</button>
+
 </div>
+
 
 <div id="leaderboardScreen" class="screen">
 
@@ -176,6 +183,7 @@ margin-top:-5px;
 
 </div>
 
+
 <canvas id="confetti"></canvas>
 
 <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-wheel-1934.mp3"></audio>
@@ -187,57 +195,23 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyCDAvHpStaZxpmELOKuXdIB5oUF90V_dL4",
-authDomain: "marvalousspin.firebaseapp.com",
-projectId: "marvalousspin",
-storageBucket: "marvalousspin.firebasestorage.app",
-messagingSenderId: "700932522616",
-appId: "1:700932522616:web:3a42098a71960894e4638d"
+apiKey:"AIzaSyCDAvHpStaZxpmELOKuXdIB5oUF90V_dL4",
+authDomain:"marvalousspin.firebaseapp.com",
+projectId:"marvalousspin",
+storageBucket:"marvalousspin.firebasestorage.app",
+messagingSenderId:"700932522616",
+appId:"1:700932522616:web:3a42098a71960894e4638d"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 let playerName=""
 let coins=0
 
 const rewards=[0,5,10,20,50,0,15,100]
 
-/* DEVICE ID SYSTEM */
-
-function getDeviceID(){
-
-let id=localStorage.getItem("deviceID")
-
-if(!id){
-id=crypto.randomUUID()
-localStorage.setItem("deviceID",id)
-}
-
-return id
-}
-
-const deviceID=getDeviceID()
-
-/* WEEK SYSTEM */
-
-function getWeekID(){
-
-const now=new Date()
-const sunday=new Date(now)
-
-sunday.setDate(now.getDate()-now.getDay())
-sunday.setHours(20,0,0,0)
-
-if(now<sunday){
-sunday.setDate(sunday.getDate()-7)
-}
-
-return sunday.toISOString().split("T")[0]
-
-}
-
-/* SCREEN SWITCH */
+const sliceAngle=360/8
 
 function switchScreen(screen){
 
@@ -255,14 +229,6 @@ alert("Enter your Facebook name")
 return
 }
 
-let savedName=localStorage.getItem("lockedName")
-
-if(!savedName){
-localStorage.setItem("lockedName",playerName)
-}else{
-playerName=savedName
-}
-
 if(localStorage.getItem("played")==new Date().toDateString()){
 alert("You already played today")
 return
@@ -278,15 +244,15 @@ document.getElementById("spinSound").play()
 
 const wheel=document.getElementById("wheel")
 
-let spin=3600+Math.floor(Math.random()*360)
+const randomSlice=Math.floor(Math.random()*8)
 
-wheel.style.transform="rotate("+spin+"deg)"
+const rotation=3600+(randomSlice*sliceAngle)
+
+wheel.style.transform="rotate("+rotation+"deg)"
 
 setTimeout(()=>{
 
-let reward=rewards[Math.floor(Math.random()*rewards.length)]
-
-coins=reward
+coins=rewards[randomSlice]
 
 finishGame()
 
@@ -294,12 +260,23 @@ finishGame()
 
 }
 
+function getWeekID(){
+
+const now=new Date()
+const sunday=new Date(now)
+
+sunday.setDate(now.getDate()-now.getDay())
+sunday.setHours(20,0,0,0)
+
+if(now<sunday){
+sunday.setDate(sunday.getDate()-7)
+}
+
+return sunday.toISOString().split("T")[0]
+
+}
+
 async function finishGame(){
-
-/* VALIDATE SCORE */
-
-if(coins>100) coins=100
-if(coins<0) coins=0
 
 localStorage.setItem("played",new Date().toDateString())
 
@@ -315,7 +292,6 @@ confetti()
 await addDoc(collection(db,"scores"),{
 name:playerName,
 score:coins,
-device:deviceID,
 week:getWeekID(),
 time:new Date()
 })
@@ -376,41 +352,14 @@ const ctx=canvas.getContext("2d")
 canvas.width=window.innerWidth
 canvas.height=window.innerHeight
 
-let pieces=[]
-
 for(let i=0;i<120;i++){
 
-pieces.push({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-size:5+Math.random()*5,
-speed:2+Math.random()*3
-})
-
-}
-
-function draw(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-pieces.forEach(p=>{
-
 ctx.fillStyle="gold"
-ctx.fillRect(p.x,p.y,p.size,p.size)
-
-p.y+=p.speed
-
-if(p.y>canvas.height)p.y=0
-
-})
-
-requestAnimationFrame(draw)
+ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,5,5)
 
 }
 
-draw()
-
-setTimeout(()=>{ctx.clearRect(0,0,canvas.width,canvas.height)},3000)
+setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),2000)
 
 }
 
