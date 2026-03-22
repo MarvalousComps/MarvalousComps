@@ -354,24 +354,24 @@ document.getElementById("leaderboard").innerHTML=html
 }
 
 
-window.restart=function(){
-switchScreen("startScreen")
-}
 window.shareWin = function(){
 
 const score = coins
 const name = playerName
 
-const link = "https://marvalouscomps.github.io/MarvalousComps/?challenge=" + score + "&player=" + encodeURIComponent(name)
+const link =
+"https://marvalouscomps.github.io/MarvalousComps/?challenge=" +
+score +
+"&player=" +
+encodeURIComponent(name)
 
-const message =
-name + " just won " + score + " coins on the Marvalous Competitions Spin Wheel! 🎉\n\nThink you can beat me?"
+const shareURL =
+"https://www.facebook.com/sharer/sharer.php?u=" +
+encodeURIComponent(link)
 
-navigator.clipboard.writeText(message)
+window.open(shareURL,"_blank")
 
-window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(link),"_blank")
-
-alert("Your result has been copied. Paste it into the Facebook post!")
+}
 
 }
 
