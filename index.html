@@ -257,9 +257,9 @@ alert("Enter your Facebook name")
 return
 }
 
-//if(localStorage.getItem("played")==new Date().toDateString()){
+if(localStorage.getItem("played")==new Date().toDateString()){
 alert("You already played today")
-//return
+return
 }
 
 switchScreen("gameScreen")
