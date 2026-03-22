@@ -13,44 +13,51 @@
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(#5b1dbf,#1c0647);
-color:white;
+background:linear-gradient(180deg,#5b1fd0,#1b0347);
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
-text-align:center;
+color:white;
 }
 
-.container{
+.app{
+
 width:420px;
 max-width:95%;
+background:#3c1191;
+border-radius:24px;
+padding:25px;
+box-shadow:0 20px 50px rgba(0,0,0,0.5);
+text-align:center;
+
 }
 
 .logo{
-width:260px;
+width:230px;
 margin-bottom:10px;
 }
 
 input{
-padding:12px;
-width:80%;
-border-radius:8px;
+width:85%;
+padding:14px;
 border:none;
-margin-bottom:20px;
+border-radius:12px;
 font-size:16px;
+margin-top:10px;
 text-align:center;
 }
 
 button{
 background:linear-gradient(#ffd84d,#ffb300);
 border:none;
-padding:16px 28px;
-border-radius:12px;
+padding:16px 30px;
+border-radius:14px;
 font-size:18px;
 font-weight:bold;
+margin-top:15px;
 cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,0.4);
+box-shadow:0 5px 12px rgba(0,0,0,0.4);
 }
 
 .screen{
@@ -62,74 +69,75 @@ display:block;
 }
 
 .pointer{
-font-size:34px;
-margin-bottom:-10px;
+font-size:36px;
 }
 
-.wheel-wrapper{
-position:relative;
-margin:auto;
+.wheel{
+
 width:280px;
 height:280px;
-}
-
-#wheel{
-width:100%;
-height:100%;
 border-radius:50%;
-border:12px solid gold;
+margin:20px auto;
+border:14px solid gold;
+
 background:conic-gradient(
 #ffffff 0deg 45deg,
-#8a39ff 45deg 90deg,
+#8c42ff 45deg 90deg,
 #ffffff 90deg 135deg,
-#8a39ff 135deg 180deg,
+#8c42ff 135deg 180deg,
 #ffffff 180deg 225deg,
-#8a39ff 225deg 270deg,
+#8c42ff 225deg 270deg,
 #ffffff 270deg 315deg,
-#8a39ff 315deg 360deg
+#8c42ff 315deg 360deg
 );
-transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
+
 display:flex;
 align-items:center;
 justify-content:center;
+
+transition:transform 4s cubic-bezier(.17,.67,.32,1.35);
+
 }
 
-.wheel-center{
-width:70px;
-height:70px;
+.center{
 background:gold;
+width:80px;
+height:80px;
 border-radius:50%;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:24px;
-color:black;
 font-weight:bold;
+color:black;
+font-size:18px;
 }
 
 .leaderboard{
-margin-top:20px;
-background:rgba(0,0,0,0.4);
+background:#2a0b67;
+border-radius:14px;
 padding:15px;
-border-radius:12px;
+margin-top:20px;
 }
 
 .row{
 display:flex;
 justify-content:space-between;
-padding:6px 0;
+padding:8px 0;
 border-bottom:1px solid rgba(255,255,255,0.2);
 }
 
 </style>
+
 </head>
 
 
 <body>
 
-<div class="container">
+
+<div class="app">
 
 <img src="Logo.jpg" class="logo">
+
 
 <!-- START SCREEN -->
 
@@ -150,19 +158,13 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 <div id="gameScreen" class="screen">
 
-<div class="pointer">⬇️</div>
+<div class="pointer">⬇</div>
 
-<div class="wheel-wrapper">
+<div id="wheel" class="wheel">
 
-<div id="wheel">
-
-<div class="wheel-center">SPIN</div>
+<div class="center">SPIN</div>
 
 </div>
-
-</div>
-
-<br>
 
 <button onclick="spinWheel()">SPIN NOW</button>
 
@@ -175,7 +177,7 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 <h2 id="result"></h2>
 
-<button onclick="showLeaderboard()">View Top Players</button>
+<button onclick="showLeaderboard()">View Leaderboard</button>
 
 </div>
 
@@ -192,14 +194,11 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 
 </div>
 
-<br>
-
 <button onclick="restart()">Back</button>
 
 </div>
 
 </div>
-
 
 
 <script>
@@ -274,8 +273,8 @@ document.getElementById("result").innerText=
 playerName+" won "+coins+" coins!"
 
 await supabaseClient
-.from("scores")
-.insert([{name:playerName,score:coins}])
+.from("Scores")
+.insert([{name:playerName,score:coins,week:"week1"}])
 
 }
 
@@ -284,13 +283,17 @@ async function showLeaderboard(){
 
 switchScreen("leaderboardScreen")
 
-let { data } = await supabaseClient
+let { data, error } = await supabaseClient
 .from("Scores")
 .select("*")
 .order("score",{ascending:false})
 .limit(10)
 
 let html=""
+
+if(!data || data.length===0){
+html="No scores yet"
+}
 
 data.forEach((p,i)=>{
 
