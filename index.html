@@ -475,7 +475,10 @@ draw()
 setTimeout(()=>{ctx.clearRect(0,0,canvas.width,canvas.height)},3000)
 
 }
-
+  
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+}
 </script>
 
 </body>
