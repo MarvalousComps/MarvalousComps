@@ -189,7 +189,7 @@ margin-top:-5px;
 <h2 id="result"></h2>
 <button onclick="shareWin()">Share On Facebook</button>
 <button onclick="showLeaderboard()">View Leaderboard</button>
-
+<button onclick="copyChallenge()">Copy Challenge Link</button>
 </div>
 
 
@@ -371,6 +371,20 @@ const shareURL =
 encodeURIComponent(link)
 
 window.open(shareURL,"_blank")
+
+}
+window.copyChallenge=function(){
+
+const text =
+playerName + " just won " + coins +
+" coins on the Marvalous Competitions Spin Wheel! 🎉\n\nThink you can beat me?\n\nhttps://marvalouscomps.github.io/MarvalousComps/?challenge=" +
+coins +
+"&player=" +
+encodeURIComponent(playerName)
+
+navigator.clipboard.writeText(text)
+
+alert("Challenge copied! Paste it on Facebook.")
 
 }
 function confetti(){
