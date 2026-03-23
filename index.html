@@ -272,6 +272,23 @@ return
 // return
 // }
 
+const playerRef = doc(db,"scores",playerName)
+
+const playerSnap = await getDoc(playerRef)
+
+if(playerSnap.exists()){
+
+let lastSpin = playerSnap.data().lastSpin?.toDate()
+
+let today = new Date()
+
+if(lastSpin && lastSpin.toDateString() === today.toDateString()){
+alert("You already played today")
+return
+}
+
+}
+
 switchScreen("gameScreen")
 
 }
