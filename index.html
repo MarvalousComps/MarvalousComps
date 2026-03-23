@@ -375,6 +375,21 @@ encodeURIComponent(link)
 window.open(shareURL,"_blank")
 
 }
+window.copyChallenge=function(){
+
+const text =
+playerName + " just won " + coins +
+" coins on the Marvalous Spin Wheel! 🎉\n\nThink you can beat me?\n\n" +
+"https://marvalouscomps.github.io/MarvalousComps/?challenge=" +
+coins +
+"&player=" +
+encodeURIComponent(playerName)
+
+navigator.clipboard.writeText(text)
+
+alert("Challenge copied! Paste it on Facebook or send to friends.")
+
+}
 function confetti(){
 
 const canvas=document.getElementById("confetti")
