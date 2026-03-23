@@ -1,0 +1,20 @@
+{
+  "name": "Marvalous Competitions",
+  "short_name": "Marvalous Spin",
+  "start_url": "/MarvalousComps/",
+  "display": "standalone",
+  "background_color": "#220657",
+  "theme_color": "#6a1bd1",
+  "icons": [
+    {
+      "src": "wheel-preview.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "wheel-preview.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
