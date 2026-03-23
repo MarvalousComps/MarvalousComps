@@ -236,7 +236,7 @@ const db = getFirestore(app);
 let playerName=""
 let coins=0
 
-const rewards=[0,5,10,20,50,0,15,100]
+const rewards=[0,5,10,15,20,25,50,100]
 
 
 function switchScreen(screen){
@@ -296,7 +296,14 @@ localStorage.setItem("played",new Date().toDateString())
 
 switchScreen("resultScreen")
 
-document.getElementById("result").innerText=
+if(coins===0){
+
+document.getElementById("result").innerText =
+"Unlucky! Try Again Tomorrow!"
+
+}else{
+
+document.getElementById("result").innerText =
 playerName+" won "+coins+" coins!"
 
 document.getElementById("winSound").play()
