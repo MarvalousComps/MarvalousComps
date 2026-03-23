@@ -269,7 +269,9 @@ switchScreen("gameScreen")
 
 window.spinWheel=function(){
 
-document.getElementById("spinSound").play()
+const spinAudio = document.getElementById("spinSound")
+spinAudio.currentTime = 0
+spinAudio.play().catch(()=>{})
 
 const wheel=document.getElementById("wheel")
 
@@ -308,7 +310,9 @@ document.getElementById("result").innerText =
 document.getElementById("result").innerText =
 playerName+" won "+coins+" coins!"
 
-document.getElementById("winSound").play()
+const winAudio = document.getElementById("winSound")
+winAudio.currentTime = 0
+winAudio.play().catch(()=>{})
 
 confetti()
 
