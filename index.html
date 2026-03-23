@@ -225,7 +225,9 @@ margin-top:-5px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+import { getFirestore, collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc }
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -324,11 +326,29 @@ winAudio.play().catch(()=>{})
 
 confetti()
 
-await addDoc(collection(db,"scores"),{
+const playerRef = doc(db,"scores",playerName)
+
+const playerSnap = await getDoc(playerRef)
+
+if(playerSnap.exists()){
+
+let currentScore = playerSnap.data().score
+
+await setDoc(playerRef,{
+name:playerName,
+score:currentScore + coins,
+time:new Date()
+})
+
+}else{
+
+await setDoc(playerRef,{
 name:playerName,
 score:coins,
 time:new Date()
 })
+
+}
 
 }
 }
